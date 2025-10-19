@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "189846349067",
+    "project_id": "rootrails-4c8b6",
+    "storage_bucket": "rootrails-4c8b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189846349067:android:29bedd764a3fd5f88f2e0e",
+        "android_client_info": {
+          "package_name": "com.example.rootrails"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvzqLlz03Z45UnmxVxG6K4dDe-3sycD_o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
