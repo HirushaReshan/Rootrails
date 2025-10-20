@@ -1,20 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/my_button.dart';
-import 'package:rootrails/components/my_textfield.dart';
-import 'package:rootrails/components/square_tile.dart';
-import 'package:rootrails/services/auth_service.dart';
+import 'package:rootrails/components/cards/my_button.dart';
+import 'package:rootrails/components/cards/my_textfield.dart';
+import 'package:rootrails/components/cards/square_tile.dart';
 
-class RegisterPage extends StatefulWidget {
+class BusinessRegisterPage extends StatefulWidget {
   final Function()? onTap;
-  RegisterPage({super.key, required this.onTap});
+  BusinessRegisterPage({super.key, required this.onTap});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<BusinessRegisterPage> createState() => _BusinessRegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
   //text editing controllers
   final emailController = TextEditingController();
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/login_page.dart';
-import 'package:rootrails/pages/register_page.dart';
+import 'package:rootrails/pages/auth/login_page.dart';
+import 'package:rootrails/pages/auth/register_page.dart';
 
 
 class LoginOrRegisterPage extends StatefulWidget {

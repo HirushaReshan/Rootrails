@@ -1,52 +1,27 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/my_button.dart';
-import 'package:rootrails/components/my_textfield.dart';
-import 'package:rootrails/components/square_tile.dart';
-import 'package:rootrails/services/auth_service.dart';
+import 'package:rootrails/components/cards/my_button.dart';
+import 'package:rootrails/components/cards/my_textfield.dart';
+import 'package:rootrails/components/cards/square_tile.dart';
+import 'package:rootrails/pages/auth/forgot_password_page.dart';
 
-class RegisterPage extends StatefulWidget {
+class UserLoginPage extends StatefulWidget {
   final Function()? onTap;
-  RegisterPage({super.key, required this.onTap});
+  UserLoginPage({super.key, required this.onTap});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<UserLoginPage> createState() => _UserLoginPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _UserLoginPageState extends State<UserLoginPage> {
   //text editing controllers
   final emailController = TextEditingController();
 
   // password controller
   final passwordController = TextEditingController();
 
-  //confirmed password controller
-  final confirmPasswordController = TextEditingController();
-
-  //Business Name controller
-  final businessNameController = TextEditingController();
-
-  //Business description controller
-  final businessDescriptionController = TextEditingController();
-
-  //Price controller
-  final priceController = TextEditingController();
-
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    businessNameController.dispose();
-    businessDescriptionController.dispose();
-    priceController.dispose();
-
-    super.dispose();
-  }
-
-  // sign user Up method
-  void signUserUp() async {
+  // sign user in method
+  void signUserIn() async {
     //show loading circle
     showDialog(
       context: context,
@@ -56,26 +31,10 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     try {
-      //check if password matches and create an account
-      if (passwordController.text == confirmPasswordController.text) {
-        //create user
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
-
-        //add business details on the server
-        addUserDetails(
-          businessNameController.text.trim(),
-          businessDescriptionController.text.trim(),
-          int.parse(priceController.text.trim()),
-          emailController.text.trim(),
-          passwordController.text.trim(),
-        );
-      } else {
-        //show error message Password don't match
-        wrongPassWordMatchMessage();
-      }
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
 
       //pop the Loading animation
       Navigator.pop(context);
@@ -96,34 +55,6 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future addUserDetails(
-    String businessName,
-    String businessDescription,
-    int price,
-    String email,
-    String password,
-  ) async {
-    // Format the business name to be a valid Firestore ID (no spaces, lowercase)
-    String formattedBusinessName = businessName
-        .trim()
-        .replaceAll(' ', '_')
-        .toLowerCase();
-
-    await FirebaseFirestore.instance
-        .collection('Business_Users')
-        .doc(
-          formattedBusinessName,
-        ) 
-        .set({
-          'Business name': businessName,
-          'Business description': businessDescription,
-          'Business price': price,
-          'email': email,
-          'password': password,
-          'createdAt': FieldValue.serverTimestamp(), // adds timestamp
-        });
-  }
-
   //wrong email message popup
   void wrongEmailMessage() {
     showDialog(
@@ -142,7 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  //wrong password message popup
+  //wrong email message popup
   void wrongPassWordMessage() {
     showDialog(
       context: context,
@@ -152,23 +83,6 @@ class _RegisterPageState extends State<RegisterPage> {
           title: Center(
             child: Text(
               'Incorrect Password',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void wrongPassWordMatchMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[700],
-          title: Center(
-            child: Text(
-              'Passwords Don\'t macth',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -205,32 +119,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 25),
 
-                //businesName textField
-                MyTextfield(
-                  controller: businessNameController,
-                  hintText: 'Business Name',
-                  obscureText: false,
+                Text(
+                  'Log-in As a General USER',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 16,
+                  ),
                 ),
 
-                const SizedBox(height: 15),
-
-                //Business Description textField
-                MyTextfield(
-                  controller: businessDescriptionController,
-                  hintText: 'Enter a small Description',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
-
-                //Business Price textField
-                MyTextfield(
-                  controller: priceController,
-                  hintText: 'Enter the price for a Ride LKR',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
+                const SizedBox(height: 25),
 
                 //User email textField
                 MyTextfield(
@@ -250,19 +147,39 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 15),
 
-                //Confirm Password field
-                MyTextfield(
-                  controller: confirmPasswordController,
-                  hintText: 'Confirm Password',
-                  obscureText: true,
+                //forgot password
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ForgotPasswordPage();
+                              },
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'forgot password ?',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-
-                const SizedBox(height: 15),
 
                 const SizedBox(height: 25),
 
                 // Sign in Button
-                MyButton(onTap: signUserUp, text: 'Sign Up'),
+                MyButton(onTap: signUserIn, text: 'Sign In'),
 
                 const SizedBox(height: 50),
 
@@ -302,18 +219,25 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 50),
 
+                MyButton(onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/selector_page');;
+                }, text: 'Go back'),
+
+                const SizedBox(height: 50),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already Have an Account ?',
+                      'Not a Member?',
                       style: TextStyle(color: Colors.grey[700]),
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: widget.onTap,
                       child: Text(
-                        'Login Now',
+                        'Register Now',
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,

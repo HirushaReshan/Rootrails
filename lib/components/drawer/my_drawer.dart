@@ -5,7 +5,7 @@ class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
   //sginout User
-     void signUserOut(){
+  void signUserOut() {
     FirebaseAuth.instance.signOut();
   }
 
@@ -25,42 +25,35 @@ class MyDrawer extends StatelessWidget {
                   color: const Color.fromARGB(255, 0, 0, 0),
                 ),
               ),
-              
+
               //Home tile
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.home,
-                    color: Colors.grey,),
+                  leading: Icon(Icons.home, color: Colors.grey),
                   title: Text('H O M E'),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
               ),
-              
 
               //Profile Tile
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.group,
-                    color: Colors.grey,),
+                  leading: Icon(Icons.group, color: Colors.grey),
                   title: Text('P R O F I L E'),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
               ),
-              
+
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.animation,
-                    color: Colors.grey,),
+                  leading: Icon(Icons.animation, color: Colors.grey),
                   title: Text('A N O T H E R'),
                   onTap: () {
                     Navigator.pop(context);
@@ -72,9 +65,7 @@ class MyDrawer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading: Icon(
-                    Icons.call,
-                    color: Colors.grey,),
+                  leading: Icon(Icons.call, color: Colors.grey),
                   title: Text('C O N T A C T  U S'),
                   onTap: () {
                     Navigator.pop(context);
@@ -84,14 +75,12 @@ class MyDrawer extends StatelessWidget {
               ),
             ],
           ),
-          
+
           //Logout Button
           Padding(
             padding: const EdgeInsets.only(left: 25.0, bottom: 25.0),
             child: ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: Colors.grey,),
+              leading: Icon(Icons.logout, color: Colors.grey),
               title: Text('LOG OUT'),
               onTap: () {
                 //pop the darwer
@@ -102,7 +91,6 @@ class MyDrawer extends StatelessWidget {
               },
             ),
           ),
-
         ],
       ),
     );
