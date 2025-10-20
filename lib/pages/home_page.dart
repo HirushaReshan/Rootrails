@@ -1,26 +1,72 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:rootrails/components/my_drawer.dart';
+import 'package:rootrails/read%20data/get_user_name.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
     final user = FirebaseAuth.instance.currentUser!;
 
-   void signUserOut(){
-    FirebaseAuth.instance.signOut();
-  }
+    //Document IDs
+    List<String> docsIDs = [];
+
+    //get Document IDs
+    Future getDocId() async {
+      docsIDs.clear();
+      await FirebaseFirestore.instance.collection('Business_Users').get().then(
+        (snapshot) => snapshot.docs.forEach(
+          (document) {
+            print(document.reference);
+            docsIDs.add(document.reference.id);
+          }
+        )
+      );
+    }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: signUserOut,
-            icon: Icon(Icons.logout))
-        ],
+        backgroundColor: Colors.grey.shade400,
+        title: Text(
+              'Logged in as : ' + user.email!,
+              style: TextStyle(
+                color: Colors.grey[300],
+                fontSize: 16,
+              ),
+            ),
       ),
+      drawer: MyDrawer(),
+
+
       body: Center(
-        child: Text(
-          'Logged in as : ' + user.email!
+        child: Column(
+          children: [
+            
+            Expanded(
+              child: FutureBuilder(
+                future: getDocId(),
+                builder: (context, snapshot) {
+                  return ListView.builder(
+                itemCount: docsIDs.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: GetUserName(documentId: docsIDs[index]),
+                  );
+                },
+              );
+                },
+              )
+            )
+          ],
         ),
       ),
     );
