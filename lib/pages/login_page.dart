@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:rootrails/components/my_button.dart';
 import 'package:rootrails/components/my_textfield.dart';
 import 'package:rootrails/components/square_tile.dart';
+import 'package:rootrails/pages/forgot_password_page.dart';
 import 'package:rootrails/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
-  LoginPage({
-    super.key,
-    required this.onTap,});
+  LoginPage({super.key, required this.onTap});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -23,16 +22,14 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   // sign user in method
-  void signUserIn() async{
-
+  void signUserIn() async {
     //show loading circle
     showDialog(
       context: context,
       builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      });
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -109,9 +106,9 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 25),
                 //Login page Icon
                 Icon(Icons.lock, size: 100),
-            
-                const SizedBox(height: 25,),
-            
+
+                const SizedBox(height: 25),
+
                 //Welcom Back Massege
                 Text(
                   'Welcome Back to Rootrails!',
@@ -120,51 +117,63 @@ class _LoginPageState extends State<LoginPage> {
                     fontSize: 16,
                   ),
                 ),
-            
+
                 const SizedBox(height: 25),
-            
+
                 //User email textField
                 MyTextfield(
                   controller: emailController,
                   hintText: 'User Email : User@gmail.com',
                   obscureText: false,
                 ),
-            
+
                 const SizedBox(height: 15),
-            
+
                 //Password field
                 MyTextfield(
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: true,
                 ),
-            
-                const SizedBox(height: 15,),
-            
+
+                const SizedBox(height: 15),
+
                 //forgot password
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(
-                        'forgot password ?',
-                        style: TextStyle(color: Colors.grey[600]),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ForgotPasswordPage();
+                              },
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'forgot password ?',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-            
-                const SizedBox(height: 25,),
-            
+
+                const SizedBox(height: 25),
+
                 // Sign in Button
-                MyButton(
-                  onTap: signUserIn,
-                  text: 'Sign In',
-                ),
-            
+                MyButton(onTap: signUserIn, text: 'Sign In'),
+
                 const SizedBox(height: 50),
-            
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -185,22 +194,22 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-            
-                const SizedBox(height: 25,),
-            
+
+                const SizedBox(height: 25),
+
                 // google login image
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SquareTile(
                       imagePath: 'lib/images/google.png',
-                      onTap: () => AuthService().signInWithGoogle(),
-                    )
-                    ],
+                      onTap: () {} /* => AuthService().signInWithGoogle() */,
+                    ),
+                  ],
                 ),
-            
-                const SizedBox(height: 50,),
-            
+
+                const SizedBox(height: 50),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
