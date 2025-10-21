@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rootrails/pages/User/user_auth_page.dart';
+import 'package:rootrails/pages/user/user_auth/user_auth_page.dart';
 import 'package:rootrails/pages/auth/auth_page.dart';
 import 'package:rootrails/pages/auth/login_or_register_page.dart';
-import 'package:rootrails/pages/business/auth/business_auth_page.dart';
+import 'package:rootrails/pages/business/business_auth/business_auth_page.dart';
 import 'package:rootrails/pages/main/contact_us_page.dart';
 import 'package:rootrails/pages/main/home_page.dart';
 import 'package:rootrails/pages/main/profile_page.dart';

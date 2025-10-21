@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/business/Pages/business_home_page.dart';
+import 'package:rootrails/pages/business/business_pages/business_home_page.dart';
 import 'business_login_or_register_page.dart';
 
 class BusinessAuthPage extends StatelessWidget {

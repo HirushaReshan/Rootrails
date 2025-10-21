@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:rootrails/pages/business/auth/business_login_page.dart';
-import 'package:rootrails/pages/business/auth/business_register_page.dart';
+import 'package:rootrails/pages/business/business_auth/business_login_page.dart';
+import 'package:rootrails/pages/business/business_auth/business_register_page.dart';
 
 
 class BusinessLoginOrRegisterPage extends StatefulWidget {

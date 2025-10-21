@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/User/user_login_or_register_page.dart';
+import 'package:rootrails/pages/user/user_auth/user_login_or_register_page.dart';
 import 'package:rootrails/pages/main/home_page.dart';
 
 class UserAuthPage extends StatelessWidget {
