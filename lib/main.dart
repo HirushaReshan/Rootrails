@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rootrails/pages/business/business_pages/business_settings_page.dart';
+import 'package:rootrails/pages/main/settings_page.dart';
 import 'package:rootrails/pages/user/user_auth/user_auth_page.dart';
-import 'package:rootrails/pages/auth/auth_page.dart';
 import 'package:rootrails/pages/auth/login_or_register_page.dart';
 import 'package:rootrails/pages/business/business_auth/business_auth_page.dart';
 import 'package:rootrails/pages/main/contact_us_page.dart';
@@ -44,6 +45,8 @@ class MyApp extends StatelessWidget {
         '/user_auth_page' : (context) => const UserAuthPage(),
         '/business_auth_page' : (context) => const BusinessAuthPage(),
         '/selector_page' : (context) => const AccountTypeNavigatePage(),
+        '/business_settings_page' : (context) => const BusinessSettingsPage(),
+        '/user_settings_page' : (context) => const SettingsPage(),
         
         
       },

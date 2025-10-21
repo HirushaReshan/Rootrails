@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MyTextfield extends StatelessWidget {
   final controller;
@@ -17,21 +18,26 @@ class MyTextfield extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: TextField(
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.normal
+        ),
         controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide(color: Colors.white),
           ),
           focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide(color: Colors.grey.shade400),
           ),
           fillColor: Colors.grey.shade200,
           filled: true,
           hintText: hintText,
-          hintStyle: TextStyle(
-            color: Colors.grey[500]
-          )
+          hintStyle: TextStyle(color: Colors.grey[500]),
+          contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20,)
         ),
       ),
     );

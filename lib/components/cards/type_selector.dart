@@ -19,22 +19,21 @@ class TypeSelector extends StatelessWidget {
           width: 120,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: Colors.white,
+            color: Colors.transparent,
+            border: Border.all(
+              color: Colors.white,
+              width: 2,
+            )
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: Colors.grey.shade200
+              Text(
+                text,
+                style: TextStyle(
+                  color: Colors.white
                 ),
-                child: Center(
-                  child: Text(text, style: TextStyle(color: Colors.grey.shade400)),
-                ),
-              ),
+              )
             ],
           ),
         ),

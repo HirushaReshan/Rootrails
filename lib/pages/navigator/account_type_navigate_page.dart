@@ -7,28 +7,37 @@ class AccountTypeNavigatePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade300,
-      body: Padding(
-        padding: const EdgeInsets.all(2),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TypeSelector(
-                text: 'User',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/user_auth_page');
-                },
-              ),
-              TypeSelector(
-                text: 'Business',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/business_auth_page');
-                },
-              ),
-            ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [
+            Colors.green.shade400,
+            Colors.green.shade900
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight)
+        ) ,
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TypeSelector(
+                  text: 'User',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/user_auth_page');
+                  },
+                ),
+                TypeSelector(
+                  text: 'Business',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/business_auth_page');
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

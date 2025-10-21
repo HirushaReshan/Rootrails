@@ -73,6 +73,18 @@ class MyDrawer extends StatelessWidget {
                   },
                 ),
               ),
+
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: Icon(Icons.settings, color: Colors.grey),
+                  title: Text('S E T T I N G S'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/settings_page');
+                  },
+                ),
+              ),
             ],
           ),
 

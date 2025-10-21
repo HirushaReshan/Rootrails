@@ -9,7 +9,7 @@ class BusinessSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("S E T T I N G S")),
+      appBar: AppBar(title: Text("B U S I N E S S  S E T T I N G S")),
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
         children: [

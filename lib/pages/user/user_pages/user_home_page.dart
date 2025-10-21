@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/drawer/my_drawer.dart';
+import 'package:rootrails/components/drawer/user_drawer.dart';
 import 'package:rootrails/read%20data/get_user_name.dart';
 
 class UserHomePage extends StatefulWidget {
@@ -44,7 +44,7 @@ class _HomePageState extends State<UserHomePage> {
               ),
             ),
       ),
-      drawer: MyDrawer(),
+      drawer: UserDrawer(),
 
 
       body: Center(

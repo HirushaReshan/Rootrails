@@ -9,7 +9,7 @@ class UserSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("S E T T I N G S")),
+      appBar: AppBar(title: Text("U S E R  S E T T I N G S")),
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
         children: [

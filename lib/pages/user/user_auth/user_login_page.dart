@@ -1,14 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/components/cards/my_button.dart';
-import 'package:rootrails/components/cards/my_button2.dart';
 import 'package:rootrails/components/cards/my_textfield.dart';
 import 'package:rootrails/components/cards/square_tile.dart';
 import 'package:rootrails/pages/auth/forgot_password_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class UserLoginPage extends StatefulWidget {
   final Function()? onTap;
-  UserLoginPage({super.key, required this.onTap});
+  const UserLoginPage({super.key, required this.onTap});
 
   @override
   State<UserLoginPage> createState() => _UserLoginPageState();
@@ -95,163 +95,275 @@ class _UserLoginPageState extends State<UserLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: SafeArea(
-        //Created a Safe Area for the Page
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 25),
-                //Login page Icon
-                Icon(Icons.lock, size: 100),
+      /* backgroundColor: Theme.of(context).colorScheme.background, */
+      body: Container(
+        //added Green gradient to the background
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.green.shade400, Colors.green.shade900],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
 
-                const SizedBox(height: 25),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
 
-                //Welcom Back Massege
-                Text(
-                  'Welcome Back to Rootrails!',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
+            children: [
+              const SizedBox(height: 100),
+
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Text(
+                      'Hello,',
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 25),
-
-                Text(
-                  'Log-in As a General USER',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
+                ],
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Text(
+                      'Sign',
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
+
+                  //Oranged colored "in" Text
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Text(
+                      'in!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 100),
+              //Icon that on top
+              Icon(Icons.group),
+              Text(
+                'User Account',
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  color: Colors.white ),
+              ),
+
+              Container(
+                //grey colored background decoration
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                  color: Colors.grey.shade300,
                 ),
 
-                const SizedBox(height: 25),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
 
-                //User email textField
-                MyTextfield(
-                  controller: emailController,
-                  hintText: 'User Email : User@gmail.com',
-                  obscureText: false,
-                ),
+                  //white colored shape
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40),
+                        topRight: Radius.circular(40),
+                      ),
+                      color: Colors.white,
+                    ),
 
-                const SizedBox(height: 15),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
 
-                //Password field
-                MyTextfield(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
-
-                const SizedBox(height: 15),
-
-                //forgot password
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return ForgotPasswordPage();
-                              },
+                            //back button
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/selector_page',
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 10.0,),
+                                    child: Icon(Icons.arrow_back),
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                        child: Text(
-                          'forgot password ?',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
+                            Text(
+                              "Sign in now",
+                              style: GoogleFonts.poppins(
+                                fontSize: 35,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+
+                            const SizedBox(height: 50),
+
+                            MyTextfield(
+                              controller: emailController,
+                              hintText: 'User Email : User@gmail.com',
+                              obscureText: false,
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            //Password field
+                            MyTextfield(
+                              controller: passwordController,
+                              hintText: 'Password',
+                              obscureText: true,
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            //forgot password
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 25.0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return ForgotPasswordPage();
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      'forgot password ?',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 25),
+
+                            // Sign in Button
+                            MyButton(onTap: signUserIn, text: 'Sign In'),
+
+                            const SizedBox(height: 50),
+
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 25.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Divider(
+                                      thickness: 1,
+                                      color: Colors.grey[400],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10.0,
+                                    ),
+                                    child: Text(
+                                      'Or Continue with',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Divider(
+                                      thickness: 1,
+                                      color: Colors.grey[400],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 25),
+
+                            // google login image
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SquareTile(
+                                  imagePath: 'lib/images/google.png',
+                                  onTap:
+                                      () {} /* => AuthService().signInWithGoogle() */,
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 50),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Not a Member?',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: widget.onTap,
+                                  child: Text(
+                                    'Register Now',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 100),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 25),
-
-                // Sign in Button
-                MyButton(onTap: signUserIn, text: 'Sign In'),
-
-                const SizedBox(height: 50),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(thickness: 1, color: Colors.grey[400]),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          'Or Continue with',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(thickness: 1, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // google login image
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SquareTile(
-                      imagePath: 'lib/images/google.png',
-                      onTap: () {} /* => AuthService().signInWithGoogle() */,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 50),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Not a Member?',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: Text(
-                        'Register Now',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 50),
-
-                MyButton2(onTap: (){
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/selector_page');;
-                }, text: 'Go back'),
-
-                const SizedBox(height: 50),
-                
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
