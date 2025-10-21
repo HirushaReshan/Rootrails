@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/main/home_page.dart';
+import 'package:rootrails/pages/business/Pages/business_home_page.dart';
 import 'business_login_or_register_page.dart';
 
 class BusinessAuthPage extends StatelessWidget {
@@ -13,7 +13,7 @@ class BusinessAuthPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData){
-            return HomePage();
+            return BusinessHomePage();
           }
 
           else{

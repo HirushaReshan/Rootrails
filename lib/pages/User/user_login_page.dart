@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/components/cards/my_button.dart';
+import 'package:rootrails/components/cards/my_button2.dart';
 import 'package:rootrails/components/cards/my_textfield.dart';
 import 'package:rootrails/components/cards/square_tile.dart';
 import 'package:rootrails/pages/auth/forgot_password_page.dart';
@@ -219,13 +220,6 @@ class _UserLoginPageState extends State<UserLoginPage> {
 
                 const SizedBox(height: 50),
 
-                MyButton(onTap: (){
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/selector_page');;
-                }, text: 'Go back'),
-
-                const SizedBox(height: 50),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -246,6 +240,16 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 50),
+
+                MyButton2(onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/selector_page');;
+                }, text: 'Go back'),
+
+                const SizedBox(height: 50),
+                
               ],
             ),
           ),

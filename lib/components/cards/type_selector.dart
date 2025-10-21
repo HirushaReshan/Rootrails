@@ -11,7 +11,7 @@ class TypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(25.0),
+      padding: const EdgeInsets.all(10),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -21,8 +21,21 @@ class TypeSelector extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             color: Colors.white,
           ),
-          child: Center(
-            child: Text(text, style: TextStyle(color: Colors.grey.shade400)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Colors.grey.shade200
+                ),
+                child: Center(
+                  child: Text(text, style: TextStyle(color: Colors.grey.shade400)),
+                ),
+              ),
+            ],
           ),
         ),
       ),

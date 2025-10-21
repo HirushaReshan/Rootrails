@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/components/cards/my_button.dart';
+import 'package:rootrails/components/cards/my_button2.dart';
 import 'package:rootrails/components/cards/my_textfield.dart';
 import 'package:rootrails/components/cards/square_tile.dart';
 
@@ -286,13 +287,6 @@ class _UserRegisterPageState extends State<UserRegisterPage> {
 
                 const SizedBox(height: 50),
 
-                MyButton(onTap: (){
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/selector_page');;
-                }, text: 'Go back'),
-
-                const SizedBox(height: 50),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -313,6 +307,17 @@ class _UserRegisterPageState extends State<UserRegisterPage> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 50,),
+
+
+                //go back button
+                MyButton2(onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/selector_page');
+                }, text: 'Go Back'),
+
+                const SizedBox(height: 50),
               ],
             ),
           ),

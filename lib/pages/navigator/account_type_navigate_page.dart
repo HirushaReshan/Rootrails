@@ -9,7 +9,7 @@ class AccountTypeNavigatePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
       body: Padding(
-        padding: const EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(2),
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

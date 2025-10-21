@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/components/cards/my_button.dart';
+import 'package:rootrails/components/cards/my_button2.dart';
 import 'package:rootrails/components/cards/my_textfield.dart';
 import 'package:rootrails/components/cards/square_tile.dart';
 
@@ -204,6 +205,16 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
 
                 const SizedBox(height: 25),
 
+                Text(
+                  'Business Register Page',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 16,
+                  ),
+                ),
+
+                const SizedBox(height: 25),
+
                 //businesName textField
                 MyTextfield(
                   controller: businessNameController,
@@ -321,6 +332,17 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 50,),
+
+
+                //go back button
+                MyButton2(onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/selector_page');
+                }, text: 'Go Back'),
+
+                const SizedBox(height: 50),
               ],
             ),
           ),
