@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/pages/auth/login_or_register_page.dart';
-import 'package:rootrails/new/pages/main/home_page.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -12,15 +11,13 @@ class AuthPage extends StatelessWidget {
       body: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          if (snapshot.hasData){
+          if (snapshot.hasData) {
             return HomePage();
-          }
-
-          else{
+          } else {
             return LoginOrRegisterPage();
           }
         },
-        ),
+      ),
     );
   }
 }

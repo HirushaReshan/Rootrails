@@ -1,110 +1,106 @@
-// lib/pages/business/business_pages/business_home_page.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/drawer/business_drawer.dart';
-import 'package:rootrails/pages/business/business_pages/business_mylist_page.dart';
-import 'package:rootrails/pages/business/business_pages/business_orders_page.dart';
-import 'package:rootrails/pages/business/business_pages/business_settings_page.dart';
+import 'package:rootrails/components/cards/app_bar_with_notifications.dart';
+import 'package:rootrails/models/booking.dart';
+import 'package:rootrails/services/firestore_service.dart';
 
-class BusinessHomePage extends StatefulWidget {
-  const BusinessHomePage({super.key});
-
-  @override
-  State<BusinessHomePage> createState() => _BusinessHomePageState();
-}
-
-class _BusinessHomePageState extends State<BusinessHomePage> {
-  int _index = 0;
+class BusinessHomePage extends StatelessWidget {
+  final String businessId;
+  const BusinessHomePage({super.key, required this.businessId});
 
   @override
   Widget build(BuildContext context) {
-    // React to auth changes so the page updates when user signs in/out
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        final user = snapshot.data;
+    final fs = FirestoreService();
 
-        // If not signed in show a small guest view prompting sign in
-        if (user == null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Business')),
-            drawer: const BusinessDrawer(),
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'You are not signed in as a business.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Please sign in to view business dashboard, requests and earnings.',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 18),
-                    ElevatedButton(
-                      onPressed: () {
-                        // If you have a dedicated auth route, navigate there.
-                        // Otherwise you can navigate back to the selector/login screen:
-                        Navigator.pushNamed(context, '/business_auth_page');
-                      },
-                      child: const Text('Sign in / Register'),
-                    ),
-                  ],
-                ),
+    return Scaffold(
+      appBar: AppBarWithNotifications(title: 'Dashboard', userId: businessId),
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Bookings',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: StreamBuilder<List<Booking>>(
+                stream: fs.streamBookingsByBusiness(businessId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No bookings'));
+                  }
+
+                  final bookings = snapshot.data!;
+
+                  return ListView.builder(
+                    itemCount: bookings.length,
+                    itemBuilder: (context, index) {
+                      final b = bookings[index];
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          title: Text('At ${b.dateTime}'),
+                          subtitle: Text('User: ${b.userId}\nStatus: ${b.status}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (b.status == 'pending')
+                                IconButton(
+                                  icon: const Icon(Icons.check, color: Colors.green),
+                                  onPressed: () async {
+                                    await fs.updateBookingStatus(b.id, 'confirmed');
+                                    await fs.addNotification({
+                                      'toUserId': b.userId,
+                                      'type': 'booking_confirmed',
+                                      'message': 'Your booking is confirmed',
+                                      'read': false,
+                                      'createdAt': DateTime.now(),
+                                    });
+                                  },
+                                ),
+                              if (b.status == 'pending')
+                                IconButton(
+                                  icon: const Icon(Icons.close, color: Colors.red),
+                                  onPressed: () async {
+                                    await fs.updateBookingStatus(b.id, 'canceled');
+                                    await fs.addNotification({
+                                      'toUserId': b.userId,
+                                      'type': 'booking_canceled',
+                                      'message': 'Your booking was canceled',
+                                      'read': false,
+                                      'createdAt': DateTime.now(),
+                                    });
+                                  },
+                                ),
+                              if (b.status == 'confirmed')
+                                IconButton(
+                                  icon: const Icon(Icons.flag, color: Colors.blue),
+                                  onPressed: () async {
+                                    await fs.completeBooking(b.id);
+                                    await fs.addNotification({
+                                      'toUserId': b.userId,
+                                      'type': 'safari_completed',
+                                      'message': 'Your safari was completed — please rate',
+                                      'read': false,
+                                      'createdAt': DateTime.now(),
+                                    });
+                                  },
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-          );
-        }
-
-        // If signed in, show the normal business UI
-        final pages = [
-          _dashboard(user),
-          const BusinessMyListPage(),
-          const BusinessOrdersPage(),
-          const BusinessSettingsPage(),
-        ];
-
-        return Scaffold(
-          appBar: AppBar(title: Text('Business: ${user.email ?? ''}')),
-          drawer: const BusinessDrawer(),
-          body: pages[_index],
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _index,
-            onTap: (i) => setState(() => _index = i),
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.list), label: 'My List'),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.receipt),
-                label: 'Orders',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _dashboard(User user) {
-    // you can fetch earnings / counts here using the user's uid when needed
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          'Business dashboard for ${user.email}\n\nPending requests & earnings summary will show here.',
-          textAlign: TextAlign.center,
+          ],
         ),
       ),
     );

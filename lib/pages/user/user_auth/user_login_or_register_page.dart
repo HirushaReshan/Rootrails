@@ -6,8 +6,7 @@ import 'user_register_page.dart';
 class UserLoginOrRegisterPage extends StatefulWidget {
   const UserLoginOrRegisterPage({super.key});
   @override
-  State<UserLoginOrRegisterPage> createState() =>
-      _UserLoginOrRegisterPageState();
+  State<UserLoginOrRegisterPage> createState() => _UserLoginOrRegisterPageState();
 }
 
 class _UserLoginOrRegisterPageState extends State<UserLoginOrRegisterPage> {
@@ -15,7 +14,5 @@ class _UserLoginOrRegisterPageState extends State<UserLoginOrRegisterPage> {
   void toggle() => setState(() => showLogin = !showLogin);
 
   @override
-  Widget build(BuildContext context) => showLogin
-      ? UserLoginPage(onTap: toggle)
-      : UserRegisterPage(onTap: toggle);
+  Widget build(BuildContext context) => showLogin ? UserLoginPage(onTap: toggle) : UserRegisterPage(onTap: toggle);
 }

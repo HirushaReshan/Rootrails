@@ -33,13 +33,12 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
 
       // Check context.mounted before any navigation or dialog to avoid errors
       if (!mounted) return;
-      
-      // Successfully logged in. Navigate to home page.
-      // NOTE: For a persistent login, using Navigator.pushReplacementNamed 
-      // here might be bypassed by BusinessAuthPage's StreamBuilder.
-      // It's generally better to let the BusinessAuthPage handle the route 
-      // change once the user state changes.
 
+      // Successfully logged in. Navigate to home page.
+      // NOTE: For a persistent login, using Navigator.pushReplacementNamed
+      // here might be bypassed by BusinessAuthPage's StreamBuilder.
+      // It's generally better to let the BusinessAuthPage handle the route
+      // change once the user state changes.
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         _show('Error: ${e.message}');
@@ -60,7 +59,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
-          )
+          ),
         ],
       ),
     );
@@ -105,7 +104,7 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
                 const Text('Don’t have an account? '),
                 // This InkWell calls onTap (the toggle function) to go to the Register page.
                 InkWell(
-                  onTap: widget.onTap, 
+                  onTap: widget.onTap,
                   child: const Text(
                     'Register Now',
                     style: TextStyle(

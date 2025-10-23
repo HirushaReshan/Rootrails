@@ -1,36 +1,42 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/pages/user/user_home_page.dart
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/cards/my_card.dart';
-import 'package:rootrails/components/drawer/user_drawer.dart';
+import 'package:rootrails/components/cards/app_bar_with_notifications.dart';
+import 'package:rootrails/models/park.dart';
+import 'package:rootrails/services/firestore_service.dart';
+import 'park_detail_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class UserHomePage extends StatefulWidget {
+class UserHomePage extends StatelessWidget {
   const UserHomePage({super.key});
-
-  @override
-  State<UserHomePage> createState() => _UserHomePageState();
-}
-
-class _UserHomePageState extends State<UserHomePage> {
   @override
   Widget build(BuildContext context) {
+    final fs = FirestoreService();
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     return Scaffold(
-      appBar: AppBar(title: const Text('Available Parks')),
-      drawer: UserDrawer(),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('Parks').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          final parks = snapshot.data!.docs;
+      appBar: AppBarWithNotifications(title: 'Parks', userId: userId),
+      body: StreamBuilder<List<Park>>(
+        stream: fs.streamParks(),
+        builder: (c, snap) {
+          if (!snap.hasData)
+            return const Center(child: CircularProgressIndicator());
+          final parks = snap.data!;
+          if (parks.isEmpty)
+            return const Center(child: Text('No parks added yet'));
           return ListView.builder(
             itemCount: parks.length,
-            itemBuilder: (context, index) {
-              final park = parks[index];
-              return MyCard(
-                title: park['name'] ?? 'Unnamed Park',
-                subtitle: park['location'] ?? '',
-                onTap: () {
-                  Navigator.pushNamed(context, '/park_detail', arguments: park.id);
-                },
+            itemBuilder: (context, i) {
+              final p = parks[i];
+              return Card(
+                margin: const EdgeInsets.all(8),
+                child: ListTile(
+                  title: Text(p.name),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ParkDetailPage(parkId: p.id),
+                    ),
+                  ),
+                ),
               );
             },
           );

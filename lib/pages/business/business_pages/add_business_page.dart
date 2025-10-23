@@ -45,7 +45,10 @@ class _AddBusinessPageState extends State<AddBusinessPage> {
             const SizedBox(height: 16),
             MyTextfield(controller: locationController, hintText: 'Location'),
             const SizedBox(height: 32),
-            MyButton(text: loading ? 'Adding...' : 'Add Business', onTap: addBusiness),
+            MyButton(
+              text: loading ? 'Adding...' : 'Add Business',
+              onTap: addBusiness,
+            ),
           ],
         ),
       ),

@@ -5,7 +5,13 @@ class MyCard extends StatelessWidget {
   final String subtitle;
   final String? imageUrl;
   final Function()? onTap;
-  const MyCard({super.key, required this.title, required this.subtitle, this.imageUrl, this.onTap});
+  const MyCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.imageUrl,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,13 @@ class MyCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Text(subtitle),
                 ],
               ),

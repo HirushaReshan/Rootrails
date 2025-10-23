@@ -41,10 +41,7 @@ class ImageCarousel extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
-                  path,
-                  fit: BoxFit.cover,
-                ),
+                Image.asset(path, fit: BoxFit.cover),
                 // Optional overlay (e.g., label or gradient)
                 Align(
                   alignment: Alignment.bottomLeft,
@@ -69,7 +66,7 @@ class ImageCarousel extends StatelessWidget {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

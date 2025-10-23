@@ -23,7 +23,8 @@ class BusinessBookingsPage extends StatelessWidget {
             .orderBy('bookingDate', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
 
           final bookings = snapshot.data!.docs;
           if (bookings.isEmpty) {
@@ -62,7 +63,9 @@ class BusinessBookingsPage extends StatelessWidget {
                           .doc(b.id)
                           .update({'status': 'Completed'});
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Booking marked as completed!')),
+                        const SnackBar(
+                          content: Text('Booking marked as completed!'),
+                        ),
                       );
                     },
                   ),

@@ -1,236 +1,100 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// lib/pages/auth/login_page.dart
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/cards/my_button.dart';
-import 'package:rootrails/components/cards/my_textfield.dart';
-import 'package:rootrails/components/cards/square_tile.dart';
-import 'package:rootrails/pages/auth/forgot_password_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../auth/user_register_page.dart';
+import '../auth/business_register_page.dart';
 
 class LoginPage extends StatefulWidget {
-  final Function()? onTap;
-  LoginPage({super.key, required this.onTap});
-
+  const LoginPage({super.key});
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  //text editing controllers
-  final emailController = TextEditingController();
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController();
+  bool loading = false;
 
-  // password controller
-  final passwordController = TextEditingController();
-
-  // sign user in method
-  void signUserIn() async {
-    //show loading circle
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-
+  Future<void> _signIn() async {
+    setState(() => loading = true);
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailCtrl.text.trim(),
+        password: passCtrl.text,
       );
-
-      //pop the Loading animation
-      Navigator.pop(context);
+      // authStateChanges in splash_router handles routing
     } on FirebaseAuthException catch (e) {
-      //pop the Loading animation
-      Navigator.pop(context);
-      print('Firebase Error code is : ${e.code}');
-      //if user email is wrong
-      if (e.code == 'invalid-email') {
-        //show the error
-        wrongEmailMessage();
-      }
-      //if password is wrong
-      else if (e.code == 'invalid-credential') {
-        //show the error
-        wrongPassWordMessage();
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Auth error: ${e.message}')));
+    } finally {
+      setState(() => loading = false);
     }
   }
 
-  //wrong email message popup
-  void wrongEmailMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[700],
-          title: Center(
-            child: Text(
-              'User Email not Found',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  //wrong email message popup
-  void wrongPassWordMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[700],
-          title: Center(
-            child: Text(
-              'Incorrect Password',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
+  @override
+  void dispose() {
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
-        //Created a Safe Area for the Page
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 25),
-                //Login page Icon
-                Icon(Icons.lock, size: 100),
-
-                const SizedBox(height: 25),
-
-                //Welcom Back Massege
-                Text(
-                  'Welcome Back to Rootrails!',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                //User email textField
-                MyTextfield(
-                  controller: emailController,
-                  hintText: 'User Email : User@gmail.com',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
-
-                //Password field
-                MyTextfield(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
-
-                const SizedBox(height: 15),
-
-                //forgot password
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return ForgotPasswordPage();
-                              },
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'forgot password ?',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // Sign in Button
-                MyButton(onTap: signUserIn, text: 'Sign In'),
-
-                const SizedBox(height: 50),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(thickness: 1, color: Colors.grey[400]),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          'Or Continue with',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(thickness: 1, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // google login image
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SquareTile(
-                      imagePath: 'lib/images/google.png',
-                      onTap: () {} /* => AuthService().signInWithGoogle() */,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'RootRails',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: emailCtrl,
+                decoration: const InputDecoration(hintText: 'Email'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passCtrl,
+                obscureText: true,
+                decoration: const InputDecoration(hintText: 'Password'),
+              ),
+              const SizedBox(height: 16),
+              loading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: _signIn,
+                      child: const Text('Login'),
                     ),
-                  ],
-                ),
-
-                const SizedBox(height: 50),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Not a Member?',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: Text(
-                        'Register Now',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const UserRegisterPage(),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    child: const Text('Register as User'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const BusinessRegisterPage(),
+                      ),
+                    ),
+                    child: const Text('Register as Business'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

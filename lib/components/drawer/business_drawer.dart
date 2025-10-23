@@ -27,25 +27,13 @@ class BusinessDrawer extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.list),
                 title: const Text('My Requests'),
-                onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/business_mylist');
-                  },
+                onTap: () => Navigator.pop(context),
               ),
               ListTile(
                 leading: const Icon(Icons.receipt),
                 title: const Text('Orders'),
-                onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/business_orders');
-                  },
+                onTap: () => Navigator.pop(context),
               ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Profile'),
-                onTap: () => Navigator.pushNamed(context, '/business_profile'),
-              ),
-
               ListTile(
                 leading: const Icon(Icons.settings),
                 title: const Text('Settings'),
