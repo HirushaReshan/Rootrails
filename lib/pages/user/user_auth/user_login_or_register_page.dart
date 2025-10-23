@@ -1,36 +1,21 @@
+// lib/pages/auth/user_login_or_register_page.dart
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/user/user_auth/user_login_page.dart';
-import 'package:rootrails/pages/user/user_auth/user_register_page.dart';
-
+import 'user_login_page.dart';
+import 'user_register_page.dart';
 
 class UserLoginOrRegisterPage extends StatefulWidget {
   const UserLoginOrRegisterPage({super.key});
-
   @override
-  State<UserLoginOrRegisterPage> createState() => _UserLoginOrRegisterPageState();
+  State<UserLoginOrRegisterPage> createState() =>
+      _UserLoginOrRegisterPageState();
 }
 
 class _UserLoginOrRegisterPageState extends State<UserLoginOrRegisterPage> {
-
-  //show login page first
-  bool showLoginPage = true;
-
-  //toggle between login and ResgisterPage
-  void togglePages(){
-    setState(() {
-      showLoginPage = !showLoginPage;
-    });
-  }
+  bool showLogin = true;
+  void toggle() => setState(() => showLogin = !showLogin);
 
   @override
-  Widget build(BuildContext context) {
-    if (showLoginPage){
-      return UserLoginPage(
-        onTap: togglePages);
-    } else {
-      return UserRegisterPage(
-        onTap: togglePages,
-      );
-    }
-  }
+  Widget build(BuildContext context) => showLogin
+      ? UserLoginPage(onTap: toggle)
+      : UserRegisterPage(onTap: toggle);
 }

@@ -1,36 +1,125 @@
+// lib/pages/auth/business_register_page.dart
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:rootrails/components/cards/my_button.dart';
 import 'package:rootrails/components/cards/my_textfield.dart';
-import 'package:rootrails/components/cards/square_tile.dart';
+import 'package:rootrails/services/cloudinary_service.dart';
 
 class BusinessRegisterPage extends StatefulWidget {
   final Function()? onTap;
-  BusinessRegisterPage({super.key, required this.onTap});
+  const BusinessRegisterPage({super.key, required this.onTap});
 
   @override
   State<BusinessRegisterPage> createState() => _BusinessRegisterPageState();
 }
 
 class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
-  //text editing controllers
   final emailController = TextEditingController();
-
-  // password controller
   final passwordController = TextEditingController();
-
-  //confirmed password controller
   final confirmPasswordController = TextEditingController();
-
-  //Business Name controller
   final businessNameController = TextEditingController();
-
-  //Business description controller
   final businessDescriptionController = TextEditingController();
-
-  //Price controller
   final priceController = TextEditingController();
+  final openingTimeController = TextEditingController(text: '08:00');
+  final closingTimeController = TextEditingController(text: '18:00');
+  final avgTimeController = TextEditingController(text: '120');
+
+  File? _selectedImage;
+  bool _loading = false;
+  final cloudinaryService = CloudinaryService();
+
+  // selected park ids (multi-select)
+  final Set<String> _selectedParkIds = {};
+
+  Future pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() => _selectedImage = File(pickedFile.path));
+    }
+  }
+
+  Future<void> signUserUp() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      return _show('Passwords do not match');
+    }
+    if (businessNameController.text.trim().isEmpty) {
+      return _show('Please enter business name');
+    }
+    if (_selectedParkIds.isEmpty) {
+      return _show('Please select at least one Park to operate in');
+    }
+
+    setState(() => _loading = true);
+
+    try {
+      // 1) create auth user
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+      final uid = cred.user!.uid;
+
+      // 2) upload image if selected
+      String imageUrl = '';
+      if (_selectedImage != null) {
+        imageUrl = await cloudinaryService.uploadImage(_selectedImage!, 'businesses');
+      }
+
+      // 3) create business user doc using uid
+      final businessDocRef =
+          FirebaseFirestore.instance.collection('Business_Users').doc(uid);
+
+      final businessData = {
+        'businessName': businessNameController.text.trim(),
+        'businessDescription': businessDescriptionController.text.trim(),
+        'email': emailController.text.trim(),
+        'price': int.tryParse(priceController.text.trim()) ?? 0,
+        'ownerUid': uid,
+        'imageUrl': imageUrl,
+        'openingTime': openingTimeController.text.trim(),
+        'closingTime': closingTimeController.text.trim(),
+        'avgSafariTimeMinutes': int.tryParse(avgTimeController.text.trim()) ?? 120,
+        'parkIds': _selectedParkIds.toList(),
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await businessDocRef.set(businessData);
+
+      // 4) update each park to include this business id in businessIds array
+      final batch = FirebaseFirestore.instance.batch();
+      for (final parkId in _selectedParkIds) {
+        final parkRef = FirebaseFirestore.instance.collection('Parks').doc(parkId);
+        batch.update(parkRef, {
+          'businessIds': FieldValue.arrayUnion([uid])
+        });
+      }
+      await batch.commit();
+
+      // done
+      if (context.mounted) {
+        _show('Business registered successfully!');
+        Navigator.pushReplacementNamed(context, '/business_home');
+      }
+    } on FirebaseAuthException catch (e) {
+      _show('Auth error: ${e.code}');
+    } catch (e) {
+      _show('Error: $e');
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  void _show(String m) => showDialog(
+        context: context,
+        builder: (_) => AlertDialog(title: Text(m), actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
+        ]),
+      );
 
   @override
   void dispose() {
@@ -40,302 +129,104 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
     businessNameController.dispose();
     businessDescriptionController.dispose();
     priceController.dispose();
-
+    openingTimeController.dispose();
+    closingTimeController.dispose();
+    avgTimeController.dispose();
     super.dispose();
-  }
-
-  // sign user Up method
-  void signUserUp() async {
-    //show loading circle
-    showDialog(
-      context: context,
-      builder: (context) {
-        return const Center(child: CircularProgressIndicator());
-      },
-    );
-
-    try {
-      //check if password matches and create an account
-      if (passwordController.text == confirmPasswordController.text) {
-        //create user
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
-
-        //add business details on the server
-        addUserDetails(
-          businessNameController.text.trim(),
-          businessDescriptionController.text.trim(),
-          int.parse(priceController.text.trim()),
-          emailController.text.trim(),
-          passwordController.text.trim(),
-        );
-      } else {
-        //show error message Password don't match
-        wrongPassWordMatchMessage();
-      }
-
-      //pop the Loading animation
-      Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      //pop the Loading animation
-      Navigator.pop(context);
-      print('Firebase Error code is : ${e.code}');
-      //if user email is wrong
-      if (e.code == 'invalid-email') {
-        //show the error
-        wrongEmailMessage();
-      }
-      //if password is wrong
-      else if (e.code == 'invalid-credential') {
-        //show the error
-        wrongPassWordMessage();
-      }
-    }
-  }
-
-  Future addUserDetails(
-    String businessName,
-    String businessDescription,
-    int price,
-    String email,
-    String password,
-  ) async {
-    // Format the business name to be a valid Firestore ID (no spaces, lowercase)
-    String formattedBusinessName = businessName
-        .trim()
-        .replaceAll(' ', '_')
-        .toLowerCase();
-
-    await FirebaseFirestore.instance
-        .collection('Business_Users')
-        .doc(
-          formattedBusinessName,
-        ) 
-        .set({
-          'Business name': businessName,
-          'Business description': businessDescription,
-          'Business price': price,
-          'email': email,
-          'password': password,
-          'createdAt': FieldValue.serverTimestamp(), // adds timestamp
-        });
-  }
-
-  //wrong email message popup
-  void wrongEmailMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[700],
-          title: Center(
-            child: Text(
-              'User Email not Found',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  //wrong password message popup
-  void wrongPassWordMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[700],
-          title: Center(
-            child: Text(
-              'Incorrect Password',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void wrongPassWordMatchMessage() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey[700],
-          title: Center(
-            child: Text(
-              'Passwords Don\'t macth',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: SafeArea(
-        //Created a Safe Area for the Page
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
+      appBar: AppBar(title: const Text('Business Register')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Picker
+            GestureDetector(
+              onTap: pickImage,
+              child: _selectedImage != null
+                  ? Image.file(_selectedImage!, height: 120, fit: BoxFit.cover)
+                  : Container(
+                      height: 120,
+                      color: Colors.grey[200],
+                      child: const Center(child: Text('Tap to select business image')),
+                    ),
+            ),
+            const SizedBox(height: 12),
+
+            MyTextfield(controller: businessNameController, hintText: 'Business name', obscureText: false),
+            const SizedBox(height: 12),
+            MyTextfield(controller: businessDescriptionController, hintText: 'Description', obscureText: false),
+            const SizedBox(height: 12),
+            MyTextfield(controller: priceController, hintText: 'Base price (LKR)', obscureText: false),
+            const SizedBox(height: 12),
+            Row(children: [
+              Expanded(child: MyTextfield(controller: openingTimeController, hintText: 'Opening time (08:00)', obscureText: false)),
+              const SizedBox(width: 8),
+              Expanded(child: MyTextfield(controller: closingTimeController, hintText: 'Closing time (18:00)', obscureText: false)),
+            ]),
+            const SizedBox(height: 12),
+            MyTextfield(controller: avgTimeController, hintText: 'Avg safari time (minutes)', obscureText: false),
+            const SizedBox(height: 12),
+
+            // Email & password
+            MyTextfield(controller: emailController, hintText: 'Email', obscureText: false),
+            const SizedBox(height: 12),
+            MyTextfield(controller: passwordController, hintText: 'Password', obscureText: true),
+            const SizedBox(height: 12),
+            MyTextfield(controller: confirmPasswordController, hintText: 'Confirm password', obscureText: true),
+            const SizedBox(height: 18),
+
+            const Text('Select parks you operate in:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+
+            // Park list with multi-select chips
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('Parks').snapshots(),
+              builder: (context, snap) {
+                if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+                final parks = snap.data!.docs;
+                if (parks.isEmpty) return const Text('No parks available — add parks in Firestore first.');
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: parks.map((p) {
+                    final id = p.id;
+                    final data = p.data() as Map<String, dynamic>;
+                    final selected = _selectedParkIds.contains(id);
+                    return FilterChip(
+                      label: Text(data['name'] ?? 'Unnamed'),
+                      selected: selected,
+                      onSelected: (v) {
+                        setState(() {
+                          if (v) _selectedParkIds.add(id);
+                          else _selectedParkIds.remove(id);
+                        });
+                      },
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+
+            const SizedBox(height: 18),
+
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : MyButton(onTap: signUserUp, text: 'Register Business'),
+            const SizedBox(height: 12),
+
+            // back / toggle
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 25),
-                //Login page Icon
-                Icon(Icons.lock, size: 100),
-
-                const SizedBox(height: 25),
-
-                //Welcom Back Massege
-                Text(
-                  'Welcome Back to Rootrails!',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                Text(
-                  'Business Register Page',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                //businesName textField
-                MyTextfield(
-                  controller: businessNameController,
-                  hintText: 'Business Name',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
-
-                //Business Description textField
-                MyTextfield(
-                  controller: businessDescriptionController,
-                  hintText: 'Enter a small Description',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
-
-                //Business Price textField
-                MyTextfield(
-                  controller: priceController,
-                  hintText: 'Enter the price for a Ride LKR',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
-
-                //User email textField
-                MyTextfield(
-                  controller: emailController,
-                  hintText: 'User Email : User@gmail.com',
-                  obscureText: false,
-                ),
-
-                const SizedBox(height: 15),
-
-                //Password field
-                MyTextfield(
-                  controller: passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
-
-                const SizedBox(height: 15),
-
-                //Confirm Password field
-                MyTextfield(
-                  controller: confirmPasswordController,
-                  hintText: 'Confirm Password',
-                  obscureText: true,
-                ),
-
-                const SizedBox(height: 15),
-
-                const SizedBox(height: 25),
-
-                // Sign in Button
-                MyButton(onTap: signUserUp, text: 'Sign Up'),
-
-                const SizedBox(height: 50),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(thickness: 1, color: Colors.grey[400]),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Text(
-                          'Or Continue with',
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(thickness: 1, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // google login image
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SquareTile(
-                      imagePath: 'lib/images/google.png',
-                      onTap: () {} /* => AuthService().signInWithGoogle() */,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 50),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Already Have an Account ?',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: widget.onTap,
-                      child: Text(
-                        'Login Now',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 50,),
+                TextButton(onPressed: widget.onTap, child: const Text('Already have an account? Login')),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );

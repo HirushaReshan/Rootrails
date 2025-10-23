@@ -30,13 +30,17 @@ class UserSettingsPage extends StatelessWidget {
                     color: Theme.of(context).colorScheme.inversePrimary,
                   ),
                 ),
-            
+
                 CupertinoSwitch(
-                  value: Provider.of<ThemeProvider>(context, listen: false)
-                      .isDarkMode,
-                  onChanged: (value) =>
-                    Provider.of<ThemeProvider>(context, listen: false)
-                        .toggleTheme()),
+                  value: Provider.of<ThemeProvider>(
+                    context,
+                    listen: false,
+                  ).isDarkMode,
+                  onChanged: (value) => Provider.of<ThemeProvider>(
+                    context,
+                    listen: false,
+                  ).toggleTheme(),
+                ),
               ],
             ),
           ),

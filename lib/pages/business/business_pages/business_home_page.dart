@@ -1,132 +1,110 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/pages/business/business_pages/business_home_page.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/carousel/carousel.dart';
 import 'package:rootrails/components/drawer/business_drawer.dart';
-import 'package:rootrails/read%20data/get_user_name.dart';
+import 'package:rootrails/pages/business/business_pages/business_mylist_page.dart';
+import 'package:rootrails/pages/business/business_pages/business_orders_page.dart';
+import 'package:rootrails/pages/business/business_pages/business_settings_page.dart';
 
 class BusinessHomePage extends StatefulWidget {
-  BusinessHomePage({super.key});
+  const BusinessHomePage({super.key});
 
   @override
-  State<BusinessHomePage> createState() => _HomePageState();
+  State<BusinessHomePage> createState() => _BusinessHomePageState();
 }
 
-class _HomePageState extends State<BusinessHomePage> {
-  final user = FirebaseAuth.instance.currentUser!;
-
-  // get Document IDs and return them
-  Future<List<String>> getDocId() async {
-    final snapshot = await FirebaseFirestore.instance.collection('Parks').get();
-    return snapshot.docs.map((d) => d.id).toList();
-  }
+class _BusinessHomePageState extends State<BusinessHomePage> {
+  int _index = 0;
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final carouselHeight = screenHeight * 0.25;
-    final parksListHeight = screenHeight * 0.5; // adjust as needed
+    // React to auth changes so the page updates when user signs in/out
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade400,
-        title: Text(
-          'Logged in as : ${user.email!}',
-          style: TextStyle(color: Colors.grey[300], fontSize: 16),
-        ),
-      ),
-      drawer: BusinessDrawer(),
-      // Entire page scrolls vertically
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Business Page',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-
-              // Image carousel (bounded height)
-              ImageCarousel(
-                imagePaths: [
-                  'lib/images/1.jpg',
-                  'lib/images/2.jpg',
-                  'lib/images/3.jpg',
-                ],
-                height: carouselHeight,
-              ),
-              const SizedBox(height: 18),
-
-              // Section title
-              const Text(
-                'Parks',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-
-              // Horizontal parks list (bounded height so it can scroll horizontally)
-              SizedBox(
-                height: parksListHeight,
-                child: FutureBuilder<List<String>>(
-                  future: getDocId(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-
-                    final ids = snapshot.data ?? [];
-
-                    if (ids.isEmpty) {
-                      return const Center(child: Text('No parks found.'));
-                    }
-
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      itemCount: ids.length,
-                      itemBuilder: (context, index) {
-                        final id = ids[index];
-                        return Container(
-                          width: 300, // card width — tweak to taste
-                          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                          child: Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // Example: park name (from GetUserName) and an action button
-                                  Expanded(
-                                    child: Center(
-                                      child: GetUserName(documentId: id),
-                                    ),
-                                  ),
-                                  
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
+        // If not signed in show a small guest view prompting sign in
+        if (user == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Business')),
+            drawer: const BusinessDrawer(),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'You are not signed in as a business.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Please sign in to view business dashboard, requests and earnings.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 18),
+                    ElevatedButton(
+                      onPressed: () {
+                        // If you have a dedicated auth route, navigate there.
+                        // Otherwise you can navigate back to the selector/login screen:
+                        Navigator.pushNamed(context, '/business_auth_page');
                       },
-                    );
-                  },
+                      child: const Text('Sign in / Register'),
+                    ),
+                  ],
                 ),
               ),
+            ),
+          );
+        }
 
-              // Example: more vertically-scrolling content after the horizontal list
-              const SizedBox(height: 20),
-              const Text('Other content below the parks...'),
-              const SizedBox(height: 600), // remove or replace with real content
+        // If signed in, show the normal business UI
+        final pages = [
+          _dashboard(user),
+          const BusinessMyListPage(),
+          const BusinessOrdersPage(),
+          const BusinessSettingsPage(),
+        ];
+
+        return Scaffold(
+          appBar: AppBar(title: Text('Business: ${user.email ?? ''}')),
+          drawer: const BusinessDrawer(),
+          body: pages[_index],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _index,
+            onTap: (i) => setState(() => _index = i),
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(icon: Icon(Icons.list), label: 'My List'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.receipt),
+                label: 'Orders',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _dashboard(User user) {
+    // you can fetch earnings / counts here using the user's uid when needed
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'Business dashboard for ${user.email}\n\nPending requests & earnings summary will show here.',
+          textAlign: TextAlign.center,
         ),
       ),
     );

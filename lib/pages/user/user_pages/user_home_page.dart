@@ -1,75 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:rootrails/components/drawer/user_drawer.dart';
-import 'package:rootrails/read%20data/get_user_name.dart';
+import 'package:rootrails/components/cards/my_card.dart';
 
 class UserHomePage extends StatefulWidget {
-  UserHomePage({super.key});
+  const UserHomePage({super.key});
 
   @override
-  State<UserHomePage> createState() => _HomePageState();
+  State<UserHomePage> createState() => _UserHomePageState();
 }
 
-class _HomePageState extends State<UserHomePage> {
-    final user = FirebaseAuth.instance.currentUser!;
-
-    //Document IDs
-    List<String> docsIDs = [];
-
-    //get Document IDs
-    Future getDocId() async {
-      docsIDs.clear();
-      await FirebaseFirestore.instance.collection('Business_Users').get().then(
-        (snapshot) => snapshot.docs.forEach(
-          (document) {
-            print(document.reference);
-            docsIDs.add(document.reference.id);
-          }
-        )
-      );
-    }
-
-
+class _UserHomePageState extends State<UserHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade400,
-        title: Text(
-              'Logged in as : ' + user.email!,
-              style: TextStyle(
-                color: Colors.grey[300],
-                fontSize: 16,
-              ),
-            ),
-      ),
-      drawer: UserDrawer(),
-
-
-      body: Center(
-        child: Column(
-          children: [
-
-            Text('Business Page'),
-            
-            Expanded(
-              child: FutureBuilder(
-                future: getDocId(),
-                builder: (context, snapshot) {
-                  return ListView.builder(
-                itemCount: docsIDs.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: GetUserName(documentId: docsIDs[index]),
-                  );
+      appBar: AppBar(title: const Text('Available Parks')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('Parks').snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          final parks = snapshot.data!.docs;
+          return ListView.builder(
+            itemCount: parks.length,
+            itemBuilder: (context, index) {
+              final park = parks[index];
+              return MyCard(
+                title: park['name'] ?? 'Unnamed Park',
+                subtitle: park['location'] ?? '',
+                onTap: () {
+                  Navigator.pushNamed(context, '/park_detail', arguments: park.id);
                 },
               );
-                },
-              )
-            )
-          ],
-        ),
+            },
+          );
+        },
       ),
     );
   }

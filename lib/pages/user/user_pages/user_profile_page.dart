@@ -5,13 +5,6 @@ class UserProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Profile Page'
-        ),
-      ),
-
-    );
+    return Scaffold(appBar: AppBar(title: Text('Profile Page')));
   }
 }

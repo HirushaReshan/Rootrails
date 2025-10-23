@@ -1,28 +1,22 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rootrails/pages/business/business_pages/business_settings_page.dart';
-import 'package:rootrails/pages/main/settings_page.dart';
-import 'package:rootrails/pages/user/user_auth/user_auth_page.dart';
-import 'package:rootrails/pages/auth/login_or_register_page.dart';
-import 'package:rootrails/pages/business/business_auth/business_auth_page.dart';
-import 'package:rootrails/pages/main/contact_us_page.dart';
-import 'package:rootrails/pages/main/home_page.dart';
-import 'package:rootrails/pages/main/profile_page.dart';
-import 'package:rootrails/pages/navigator/account_type_navigate_page.dart';
-import 'package:rootrails/themes/theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:rootrails/pages/business/business_auth/business_register_page.dart';
+import 'package:rootrails/pages/business/business_pages/business_home_page.dart';
+import 'package:rootrails/pages/user/user_auth/user_login_or_register_page.dart';
+import 'package:rootrails/pages/user/user_pages/user_home_page.dart';
 import 'firebase_options.dart';
+import 'themes/theme_provider.dart';
+import 'pages/navigator/account_type_navigate_page.dart';
+import 'pages/settings_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+      create: (_) => ThemeProvider(),
       child: const MyApp(),
     ),
   );
@@ -30,25 +24,20 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AccountTypeNavigatePage(),
+      title: 'RootRails',
       theme: Provider.of<ThemeProvider>(context).themeData,
+      initialRoute: '/',
       routes: {
-        '/login_register_page' : (context) => const LoginOrRegisterPage(),
-        '/home_page' : (context) => HomePage(),
-        '/profile_page' : (context) => const ProfilePage(),
-        '/contact_us_page' : (context) => const ContactUsPage(),
-        '/user_auth_page' : (context) => const UserAuthPage(),
-        '/business_auth_page' : (context) => const BusinessAuthPage(),
-        '/selector_page' : (context) => const AccountTypeNavigatePage(),
-        '/business_settings_page' : (context) => const BusinessSettingsPage(),
-        '/user_settings_page' : (context) => const SettingsPage(),
-        
-        
+        '/': (_) => const AccountTypeNavigatePage(),
+        '/user_auth_page': (_) => const UserLoginOrRegisterPage(),
+        '/business_register_page': (_) => BusinessRegisterPage(onTap: () {}),
+        '/user_home': (_) => const UserHomePage(),
+        '/business_home': (_) => const BusinessHomePage(),
+        '/settings': (_) => const SettingsPage(),
       },
     );
   }

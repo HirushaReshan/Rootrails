@@ -1,12 +1,12 @@
+// lib/widgets/user_drawer.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserDrawer extends StatelessWidget {
   const UserDrawer({super.key});
-
-  //sginout User
-  void signUserOut() {
-    FirebaseAuth.instance.signOut();
+  void _signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 
   @override
@@ -16,91 +16,43 @@ class UserDrawer extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          //drawer Header
           Column(
             children: [
               DrawerHeader(
                 child: Icon(
                   Icons.travel_explore,
-                  color: const Color.fromARGB(255, 0, 0, 0),
+                  size: 48,
+                  color: Colors.black,
                 ),
               ),
-
-              //Home tile
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: Icon(Icons.home, color: Colors.grey),
-                  title: Text('H O M E'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
+                onTap: () => Navigator.pop(context),
               ),
-
-              //Profile Tile
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: Icon(Icons.group, color: Colors.grey),
-                  title: Text('P R O F I L E'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text('Profile'),
+                onTap: () => Navigator.pushNamed(context, '/profile_page'),
               ),
-
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: Icon(Icons.animation, color: Colors.grey),
-                  title: Text('A N O T H E R'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
+              ListTile(
+                leading: const Icon(Icons.call),
+                title: const Text('Contact Us'),
+                onTap: () => Navigator.pushNamed(context, '/contact_us_page'),
               ),
-
-              //contact us
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: Icon(Icons.call, color: Colors.grey),
-                  title: Text('C O N T A C T  U S'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/contact_us_page');
-                  },
-                ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  leading: Icon(Icons.settings, color: Colors.grey),
-                  title: Text('S E T T I N G S'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/user_settings_page');
-                  },
-                ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
+                onTap: () => Navigator.pushNamed(context, '/settings'),
               ),
             ],
           ),
-
-          //Logout Button
           Padding(
-            padding: const EdgeInsets.only(left: 25.0, bottom: 25.0),
+            padding: const EdgeInsets.only(bottom: 20, left: 8),
             child: ListTile(
-              leading: Icon(Icons.logout, color: Colors.grey),
-              title: Text('LOG OUT'),
-              onTap: () {
-                //pop the darwer
-                Navigator.pop(context);
-
-                //signout the User
-                signUserOut();
-              },
+              leading: const Icon(Icons.logout),
+              title: const Text('Log out'),
+              onTap: () => _signOut(context),
             ),
           ),
         ],

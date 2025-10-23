@@ -2,17 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MyButton extends StatelessWidget {
-  final Function()? onTap;
+  final VoidCallback? onTap;
   final String text;
-  const MyButton({super.key, required this.onTap, required this.text});
+
+  const MyButton({
+    super.key,
+    required this.onTap,
+    required this.text,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(10),
-        margin: EdgeInsets.symmetric(horizontal: 25),
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(horizontal: 25),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.green.shade300, Colors.green.shade900],
@@ -28,7 +33,7 @@ class MyButton extends StatelessWidget {
               fontSize: 25,
               fontWeight: FontWeight.bold,
               color: Colors.white,
-            )
+            ),
           ),
         ),
       ),
