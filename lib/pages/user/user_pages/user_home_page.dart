@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/components/cards/my_card.dart';
+import 'package:rootrails/components/drawer/user_drawer.dart';
 
 class UserHomePage extends StatefulWidget {
   const UserHomePage({super.key});
@@ -14,6 +15,7 @@ class _UserHomePageState extends State<UserHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Available Parks')),
+      drawer: UserDrawer(),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('Parks').snapshots(),
         builder: (context, snapshot) {

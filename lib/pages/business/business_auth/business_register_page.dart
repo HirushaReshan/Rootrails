@@ -1,6 +1,4 @@
-// lib/pages/auth/business_register_page.dart
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +8,7 @@ import 'package:rootrails/components/cards/my_textfield.dart';
 import 'package:rootrails/services/cloudinary_service.dart';
 
 class BusinessRegisterPage extends StatefulWidget {
-  final Function()? onTap;
+  final VoidCallback onTap; // toggle to login page
   const BusinessRegisterPage({super.key, required this.onTap});
 
   @override
@@ -32,15 +30,12 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
   bool _loading = false;
   final cloudinaryService = CloudinaryService();
 
-  // selected park ids (multi-select)
   final Set<String> _selectedParkIds = {};
 
   Future pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() => _selectedImage = File(pickedFile.path));
-    }
+    if (pickedFile != null) setState(() => _selectedImage = File(pickedFile.path));
   }
 
   Future<void> signUserUp() async {
@@ -57,23 +52,18 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
     setState(() => _loading = true);
 
     try {
-      // 1) create auth user
       final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
       final uid = cred.user!.uid;
 
-      // 2) upload image if selected
       String imageUrl = '';
       if (_selectedImage != null) {
         imageUrl = await cloudinaryService.uploadImage(_selectedImage!, 'businesses');
       }
 
-      // 3) create business user doc using uid
-      final businessDocRef =
-          FirebaseFirestore.instance.collection('Business_Users').doc(uid);
-
+      final businessDocRef = FirebaseFirestore.instance.collection('Business_Users').doc(uid);
       final businessData = {
         'businessName': businessNameController.text.trim(),
         'businessDescription': businessDescriptionController.text.trim(),
@@ -90,17 +80,13 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
 
       await businessDocRef.set(businessData);
 
-      // 4) update each park to include this business id in businessIds array
       final batch = FirebaseFirestore.instance.batch();
       for (final parkId in _selectedParkIds) {
         final parkRef = FirebaseFirestore.instance.collection('Parks').doc(parkId);
-        batch.update(parkRef, {
-          'businessIds': FieldValue.arrayUnion([uid])
-        });
+        batch.update(parkRef, {'businessIds': FieldValue.arrayUnion([uid])});
       }
       await batch.commit();
 
-      // done
       if (context.mounted) {
         _show('Business registered successfully!');
         Navigator.pushReplacementNamed(context, '/business_home');
@@ -114,12 +100,17 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
     }
   }
 
-  void _show(String m) => showDialog(
-        context: context,
-        builder: (_) => AlertDialog(title: Text(m), actions: [
+  void _show(String m) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(m),
+        actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
-        ]),
-      );
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -144,7 +135,6 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Picker
             GestureDetector(
               onTap: pickImage,
               child: _selectedImage != null
@@ -156,34 +146,30 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
                     ),
             ),
             const SizedBox(height: 12),
-
             MyTextfield(controller: businessNameController, hintText: 'Business name', obscureText: false),
             const SizedBox(height: 12),
             MyTextfield(controller: businessDescriptionController, hintText: 'Description', obscureText: false),
             const SizedBox(height: 12),
             MyTextfield(controller: priceController, hintText: 'Base price (LKR)', obscureText: false),
             const SizedBox(height: 12),
-            Row(children: [
-              Expanded(child: MyTextfield(controller: openingTimeController, hintText: 'Opening time (08:00)', obscureText: false)),
-              const SizedBox(width: 8),
-              Expanded(child: MyTextfield(controller: closingTimeController, hintText: 'Closing time (18:00)', obscureText: false)),
-            ]),
+            Row(
+              children: [
+                Expanded(child: MyTextfield(controller: openingTimeController, hintText: 'Opening time (08:00)', obscureText: false)),
+                const SizedBox(width: 8),
+                Expanded(child: MyTextfield(controller: closingTimeController, hintText: 'Closing time (18:00)', obscureText: false)),
+              ],
+            ),
             const SizedBox(height: 12),
             MyTextfield(controller: avgTimeController, hintText: 'Avg safari time (minutes)', obscureText: false),
             const SizedBox(height: 12),
-
-            // Email & password
             MyTextfield(controller: emailController, hintText: 'Email', obscureText: false),
             const SizedBox(height: 12),
             MyTextfield(controller: passwordController, hintText: 'Password', obscureText: true),
             const SizedBox(height: 12),
             MyTextfield(controller: confirmPasswordController, hintText: 'Confirm password', obscureText: true),
             const SizedBox(height: 18),
-
             const Text('Select parks you operate in:', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-
-            // Park list with multi-select chips
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('Parks').snapshots(),
               builder: (context, snap) {
@@ -211,19 +197,25 @@ class _BusinessRegisterPageState extends State<BusinessRegisterPage> {
                 );
               },
             ),
-
             const SizedBox(height: 18),
-
             _loading
                 ? const Center(child: CircularProgressIndicator())
                 : MyButton(onTap: signUserUp, text: 'Register Business'),
             const SizedBox(height: 12),
-
-            // back / toggle
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(onPressed: widget.onTap, child: const Text('Already have an account? Login')),
+                InkWell(
+                  onTap: widget.onTap,
+                  child: const Text(
+                    'Already have an account? Login',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],

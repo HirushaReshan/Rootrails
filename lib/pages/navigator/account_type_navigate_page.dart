@@ -26,7 +26,7 @@ class AccountTypeNavigatePage extends StatelessWidget {
               TypeSelector(
                 text: 'Business',
                 onTap: () =>
-                    Navigator.pushNamed(context, '/business_register_page'),
+                    Navigator.pushNamed(context, '/business_auth_page'),
               ),
             ],
           ),

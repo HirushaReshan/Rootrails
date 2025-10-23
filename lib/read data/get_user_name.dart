@@ -1,3 +1,4 @@
+// lib/read_data/get_user_name.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:rootrails/pages/park_detail_page.dart';
@@ -9,19 +10,13 @@ class GetUserName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final parks = FirebaseFirestore.instance.collection('Parks');
-
     return FutureBuilder<DocumentSnapshot>(
       future: parks.doc(documentId).get(),
       builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) {
+        if (snap.connectionState == ConnectionState.waiting)
           return const Center(child: CircularProgressIndicator());
-        }
-        if (!snap.hasData || snap.hasError) {
-          return const Text('Error');
-        }
-
+        if (!snap.hasData || snap.hasError) return const Text('Error');
         final data = snap.data!.data() as Map<String, dynamic>;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -38,8 +33,7 @@ class GetUserName extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               data['name'] ?? 'No name',
-              style: const TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
             Text(
@@ -54,9 +48,7 @@ class GetUserName extends StatelessWidget {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ParkDetailPage(
-                      parkId: documentId, // only the ID is needed
-                    ),
+                    builder: (_) => ParkDetailPage(parkId: documentId),
                   ),
                 ),
                 child: const Text('View / Reserve'),

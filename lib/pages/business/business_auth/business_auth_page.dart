@@ -8,24 +8,24 @@ class BusinessAuthPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          // Show loading indicator while waiting for Firebase response
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Show loading indicator while waiting for Firebase response
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          // If user is logged in, go to home page
-          if (snapshot.hasData) {
-            return const BusinessHomePage();
-          }
+        // If user is logged in, go to home page
+        if (snapshot.hasData && snapshot.data != null) {
+          return const BusinessHomePage();
+        }
 
-          // Otherwise, show login/register page
-          return const BusinessLoginOrRegisterPage();
-        },
-      ),
+        // Otherwise, show login/register toggle page
+        return const BusinessLoginOrRegisterPage();
+      },
     );
   }
 }

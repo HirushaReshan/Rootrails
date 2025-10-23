@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// Assuming your custom components are correctly implemented
 import 'package:rootrails/components/cards/my_button.dart';
 import 'package:rootrails/components/cards/my_textfield.dart';
 
@@ -30,19 +31,38 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
         password: passwordController.text.trim(),
       );
 
-      // Navigate to business home
-      if (context.mounted) Navigator.pushReplacementNamed(context, '/business_home');
+      // Check context.mounted before any navigation or dialog to avoid errors
+      if (!mounted) return;
+      
+      // Successfully logged in. Navigate to home page.
+      // NOTE: For a persistent login, using Navigator.pushReplacementNamed 
+      // here might be bypassed by BusinessAuthPage's StreamBuilder.
+      // It's generally better to let the BusinessAuthPage handle the route 
+      // change once the user state changes.
+
     } on FirebaseAuthException catch (e) {
-      _show('Error: ${e.message}');
+      if (mounted) {
+        _show('Error: ${e.message}');
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
   void _show(String message) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(title: Text(message)),
+      builder: (_) => AlertDialog(
+        title: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          )
+        ],
+      ),
     );
   }
 
@@ -62,10 +82,19 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            MyTextfield(controller: emailController, hintText: 'Email', obscureText: false),
+            MyTextfield(
+              controller: emailController,
+              hintText: 'Email',
+              obscureText: false,
+            ),
             const SizedBox(height: 12),
-            MyTextfield(controller: passwordController, hintText: 'Password', obscureText: true),
+            MyTextfield(
+              controller: passwordController,
+              hintText: 'Password',
+              obscureText: true,
+            ),
             const SizedBox(height: 18),
+            // The main login button
             _loading
                 ? const CircularProgressIndicator()
                 : MyButton(onTap: loginBusiness, text: 'Login'),
@@ -74,11 +103,16 @@ class _BusinessLoginPageState extends State<BusinessLoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('Don’t have an account? '),
-                GestureDetector(
-                  onTap: widget.onTap, // toggle to register
+                // This InkWell calls onTap (the toggle function) to go to the Register page.
+                InkWell(
+                  onTap: widget.onTap, 
                   child: const Text(
                     'Register Now',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
                   ),
                 ),
               ],
