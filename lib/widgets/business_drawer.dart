@@ -1,23 +1,19 @@
-// File: lib/widgets/user_drawer.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rootrails/pages/common/contact_us_page.dart';
 import 'package:rootrails/pages/common/role_selection_page.dart';
 import 'package:rootrails/pages/common/settings_page.dart';
-import 'package:rootrails/pages/general_user/my_list_page.dart';
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/theme/app_themes.dart';
 
-class UserDrawer extends StatelessWidget {
-  // Note: Class name is UserDrawer
-  final String userName;
-  final String userEmail;
+class BusinessDrawer extends StatelessWidget {
+  final String businessName;
+  final String driverImageUrl;
 
-  const UserDrawer({
+  const BusinessDrawer({
     super.key,
-    required this.userName,
-    required this.userEmail,
+    required this.businessName,
+    required this.driverImageUrl,
   });
 
   @override
@@ -29,34 +25,25 @@ class UserDrawer extends StatelessWidget {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(
-              userName,
+              businessName,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            accountEmail: Text(userEmail),
+            accountEmail: const Text('Business User (Driver)'),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.secondary,
-              child: const Icon(Icons.person, size: 40, color: Colors.white),
+              backgroundImage: NetworkImage(driverImageUrl),
+              onBackgroundImageError: (exception, stackTrace) =>
+                  const Icon(Icons.person, size: 40, color: Colors.white),
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.list_alt),
-            title: const Text('My Bookings'),
-            onTap: () {
-              Navigator.pop(context);
-              // Note: You would typically route to the home page with index 1 here,
-              // but for direct navigation from the drawer, we use a placeholder or
-              // ensure the home page handles navigation via key/index.
-              // For simplicity, we navigate directly to the page for testing:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MyListPage()),
-              );
-            },
+            leading: const Icon(Icons.home_work),
+            title: const Text('Business Dashboard'),
+            onTap: () => Navigator.pop(context),
           ),
-          // NEW LINKS
           ListTile(
             leading: const Icon(Icons.contact_support),
             title: const Text('Contact Us'),
@@ -65,7 +52,7 @@ class UserDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ContactUsPage()),
-              );
+              ); // <<< LINKED
             },
           ),
           ListTile(
@@ -76,16 +63,15 @@ class UserDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsPage()),
-              );
+              ); // <<< LINKED
             },
           ),
           const Divider(),
-          // Theme Switcher Logic (reused)
+          // Theme Switcher Logic (reused from General User)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                // ... (Theme switch logic remains here)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
