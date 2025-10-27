@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:rootrails/models/booking.dart';
+import 'package:rootrails/services/booking_service.dart';
 
 class BusinessOrdersPage extends StatelessWidget {
   const BusinessOrdersPage({super.key});
@@ -11,65 +11,89 @@ class BusinessOrdersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Center(child: Text('Log in to view orders.'));
+      return const Center(child: Text('Please log in to view your orders.'));
     }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Manage Orders')),
-      body: StreamBuilder<QuerySnapshot>(
-        // Fetch bookings where the driverId matches the current user's UID
-        stream: FirebaseFirestore.instance
-            .collection('bookings')
-            .where('driver_id', isEqualTo: user.uid)
-            .orderBy('booking_date', descending: false)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(30.0),
-                child: Text(
-                  'You have no current orders. Ensure your business is OPEN to receive bookings!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ),
-            );
-          }
-
-          final bookings = snapshot.data!.docs
-              .map((doc) => Booking.fromFirestore(doc))
-              .toList();
-
-          return ListView.builder(
-            padding: const EdgeInsets.all(10.0),
-            itemCount: bookings.length,
-            itemBuilder: (context, index) {
-              return DriverBookingCard(booking: bookings[index]);
-            },
-          );
-        },
+    // Tab controller for managing different order statuses
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: const TabBar(
+          labelColor: Colors.green,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.green,
+          tabs: [
+            Tab(text: 'Pending', icon: Icon(Icons.access_time)),
+            Tab(text: 'Confirmed', icon: Icon(Icons.check_circle)),
+            Tab(text: 'History', icon: Icon(Icons.history)),
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            _buildOrderList(user.uid, 'pending'),
+            _buildOrderList(user.uid, 'confirmed'),
+            _buildOrderList(user.uid, 'completed', isHistory: true),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildOrderList(
+    String driverId,
+    String status, {
+    bool isHistory = false,
+  }) {
+    // History includes completed and canceled bookings
+    final List<String> statuses = isHistory
+        ? ['completed', 'canceled']
+        : [status];
+
+    return StreamBuilder<List<Booking>>(
+      stream: BookingService().getDriverOrders(driverId).map((bookings) {
+        return bookings.where((b) => statuses.contains(b.status)).toList();
+      }),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Text(
+              'No ${status.toUpperCase()} orders found.',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          );
+        }
+
+        final orders = snapshot.data!;
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(10.0),
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            return OrderCard(booking: orders[index], isHistory: isHistory);
+          },
+        );
+      },
     );
   }
 }
 
-class DriverBookingCard extends StatelessWidget {
+class OrderCard extends StatelessWidget {
   final Booking booking;
-  const DriverBookingCard({super.key, required this.booking});
+  final bool isHistory;
+  const OrderCard({super.key, required this.booking, this.isHistory = false});
 
   Color _getStatusColor(String status) {
     switch (status) {
       case 'confirmed':
         return Colors.green;
       case 'pending':
-        return Colors.orange;
+        return Colors.orange.shade700;
       case 'canceled':
         return Colors.red;
       case 'completed':
@@ -79,19 +103,15 @@ class DriverBookingCard extends StatelessWidget {
     }
   }
 
-  // Function to update the booking status in Firestore
   Future<void> _updateStatus(BuildContext context, String newStatus) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('bookings')
-          .doc(booking.id)
-          .update({
-            'status': newStatus,
-            'updated_at': FieldValue.serverTimestamp(),
-          });
+      await BookingService().updateBookingStatus(booking.id, newStatus);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Order status updated to $newStatus.')),
+          SnackBar(
+            content: Text('Order status updated to $newStatus'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -105,14 +125,12 @@ class DriverBookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateFormat formatter = DateFormat('EEE, MMM d, y');
-
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -120,7 +138,7 @@ class DriverBookingCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Booking ID: ${booking.id.substring(0, 8)}...',
+                  'Client: ${booking.userFullName}',
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -132,34 +150,26 @@ class DriverBookingCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(booking.status),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     booking.status.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
               ],
             ),
-            const Divider(height: 20),
-            _buildDetailRow(
-              Icons.person,
-              'Customer UID:',
-              booking.userId.substring(0, 10),
-            ),
-            _buildDetailRow(
-              Icons.calendar_today,
-              'Date:',
-              formatter.format(booking.bookingDate),
-            ),
-            _buildDetailRow(Icons.access_time, 'Time:', booking.bookingTime),
+            const Divider(),
+
             _buildDetailRow(Icons.location_on, 'Park:', booking.parkName),
             _buildDetailRow(
-              Icons.attach_money,
+              Icons.calendar_month,
+              'Date:',
+              DateFormat('EEE, MMM d, yyyy').format(booking.bookingDate),
+            ),
+            _buildDetailRow(Icons.access_time, 'Time:', booking.bookingTime),
+            _buildDetailRow(
+              Icons.money,
               'Amount:',
               '\$${booking.totalAmount.toStringAsFixed(2)}',
             ),
@@ -173,54 +183,34 @@ class DriverBookingCard extends StatelessWidget {
                 ),
               ),
 
-            // Action Buttons
-            if (booking.status == 'pending')
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.check, color: Colors.white),
-                        label: const Text(
-                          'Accept',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onPressed: () => _updateStatus(context, 'confirmed'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                        ),
-                      ),
+            if (!isHistory && booking.status == 'pending')
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => _updateStatus(context, 'canceled'),
+                    child: const Text(
+                      'REJECT',
+                      style: TextStyle(color: Colors.red),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.close, color: Colors.red),
-                        label: const Text(
-                          'Reject',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                        onPressed: () => _updateStatus(context, 'canceled'),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else if (booking.status == 'confirmed')
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0),
-                child: Center(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.done_all, color: Colors.white),
-                    label: const Text(
-                      'Mark as Completed',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () => _updateStatus(context, 'completed'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueGrey,
-                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () => _updateStatus(context, 'confirmed'),
+                    child: const Text('CONFIRM'),
+                  ),
+                ],
+              ),
+
+            if (booking.status == 'confirmed')
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.check),
+                  label: const Text('MARK COMPLETE'),
+                  onPressed: () => _updateStatus(context, 'completed'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
                   ),
                 ),
               ),
@@ -230,16 +220,15 @@ class DriverBookingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(IconData icon, String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey),
+          Icon(icon, size: 18, color: Colors.grey.shade600),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(width: 4),
-          Flexible(child: Text(value, overflow: TextOverflow.ellipsis)),
+          Text('$title ', style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value),
         ],
       ),
     );

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/general_user/general_user_registration_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
-import 'general_user_home_page.dart'; // The page to navigate to after successful login
+import 'package:rootrails/pages/general_user/general_user_registration_page.dart';
+import 'package:rootrails/pages/general_user/general_user_home_page.dart';
 
 class GeneralUserLoginPage extends StatefulWidget {
   const GeneralUserLoginPage({super.key});
@@ -12,63 +13,40 @@ class GeneralUserLoginPage extends StatefulWidget {
 }
 
 class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  final AuthService _authService = AuthService();
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
-  Future<void> _signIn() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        await _authService.signInWithEmail(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        if (mounted) {
-          // Navigate to Home Page on success (AuthWrapper handles the navigation)
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => const GeneralUserHomePage(),
-            ),
-            (Route<dynamic> route) => false,
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      }
-    }
-  }
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoading = true;
     });
+
     try {
-      await _authService.signInWithGoogle();
+      await AuthService().signInWithEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
       if (mounted) {
+        // Navigate to General User Home Page and clear navigation stack
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const GeneralUserHomePage()),
           (Route<dynamic> route) => false,
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          SnackBar(
+            content: Text(
+              'Login Failed: ${e.toString().split(':').last.trim()}',
+            ),
+          ),
         );
       }
     } finally {
@@ -80,62 +58,27 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
     }
   }
 
-  Future<void> _forgotPassword(String email) async {
-    if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your email to reset password.'),
-        ),
-      );
-      return;
-    }
-    try {
-      await _authService.sendPasswordResetEmail(email);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Password reset link sent to $email.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('General User Login')),
+      appBar: AppBar(title: const Text('Customer Login')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(30.0),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Welcome Back!',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 30),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Icon(Icons.person, size: 80, color: Colors.green),
+                const SizedBox(height: 40),
 
                 // Email Field
                 CustomTextField(
                   controller: _emailController,
                   hintText: 'Email',
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) =>
-                      value!.isEmpty ? 'Enter your email' : null,
+                  validator: (v) => v!.isEmpty ? 'Email is required' : null,
                 ),
                 const SizedBox(height: 20),
 
@@ -143,126 +86,65 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
                 CustomTextField(
                   controller: _passwordController,
                   hintText: 'Password',
-                  obscureText: true,
-                  suffixIcon: const Icon(Icons.lock),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Enter your password' : null,
-                ),
-                const SizedBox(height: 10),
-
-                // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () =>
-                        _forgotPassword(_emailController.text.trim()),
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
+                  obscureText: !_isPasswordVisible,
+                  validator: (v) => v!.length < 6
+                      ? 'Password must be at least 6 characters'
+                      : null,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 30),
 
                 // Login Button
                 _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
+                    ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _signIn,
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 5,
                         ),
                         child: const Text(
-                          'Login',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                          'Sign In',
+                          style: TextStyle(fontSize: 18),
                         ),
                       ),
+
                 const SizedBox(height: 20),
 
-                // Divider with OR
+                // Divider and Google Button (if needed)
+                const Divider(height: 40),
+
+                // Register Link
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Divider(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Text(
-                        'OR',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                    Expanded(
-                      child: Divider(
-                        color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
+                    const Text('Don\'t have an account?'),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const GeneralUserRegistrationPage(),
+                          ),
+                        );
+                      },
+                      child: const Text('Register Now'),
                     ),
                   ],
-                ),
-                const SizedBox(height: 20),
-
-                // Google Login Button
-                OutlinedButton.icon(
-                  onPressed: _signInWithGoogle,
-                  icon: const Icon(
-                    Icons.g_mobiledata_rounded,
-                    size: 24,
-                  ), // Using a standard Material Icon as a substitute for google.png
-                  label: const Text('Sign in with Google'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // Register Now Link
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const GeneralUserRegistrationPage(),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Not a member ? ',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      Text(
-                        'Register now',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ],
             ),

@@ -11,11 +11,11 @@ class MyListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return const Center(child: Text('Please log in to see your bookings.'));
+      return const Center(child: Text('Please log in to view your bookings.'));
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Safaris & Bookings')),
+      appBar: AppBar(title: const Text('My Bookings')),
       body: StreamBuilder<List<Booking>>(
         stream: BookingService().getUserBookings(user.uid),
         builder: (context, snapshot) {
@@ -27,13 +27,9 @@ class MyListPage extends StatelessWidget {
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(30.0),
-                child: Text(
-                  'You have no active or past bookings. Explore parks and drivers to get started!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
+              child: Text(
+                'You have no active or past bookings.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             );
           }
@@ -62,7 +58,7 @@ class BookingCard extends StatelessWidget {
       case 'confirmed':
         return Colors.green;
       case 'pending':
-        return Colors.orange;
+        return Colors.orange.shade700;
       case 'canceled':
         return Colors.red;
       case 'completed':
@@ -72,59 +68,17 @@ class BookingCard extends StatelessWidget {
     }
   }
 
-  // Logic to handle cancellation
-  Future<void> _cancelBooking(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Cancel Booking?'),
-        content: Text(
-          'Are you sure you want to cancel your booking with ${booking.driverName}?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      try {
-        await BookingService().cancelBooking(booking.id);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Booking successfully canceled.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Failed to cancel: $e')));
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final DateFormat formatter = DateFormat('EEE, MMM d, y');
+    final bool isCancellable =
+        booking.status == 'pending' || booking.status == 'confirmed';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -144,60 +98,46 @@ class BookingCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(booking.status),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     booking.status.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
               ],
             ),
-            const Divider(height: 20),
+            const SizedBox(height: 5),
+            Text(
+              booking.parkName,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.grey),
+            ),
+            const Divider(),
+
             _buildDetailRow(
-              Icons.calendar_today,
+              Icons.calendar_month,
               'Date:',
-              formatter.format(booking.bookingDate),
+              DateFormat('EEE, MMM d, yyyy').format(booking.bookingDate),
             ),
             _buildDetailRow(Icons.access_time, 'Time:', booking.bookingTime),
-            _buildDetailRow(Icons.location_on, 'Park:', booking.parkName),
             _buildDetailRow(
               Icons.money,
-              'Amount:',
+              'Total:',
               '\$${booking.totalAmount.toStringAsFixed(2)}',
             ),
 
-            if (booking.notes.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'Notes: ${booking.notes}',
-                  style: const TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-
-            if (booking.status == 'pending')
-              Padding(
-                padding: const EdgeInsets.only(top: 15.0),
-                child: Center(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.cancel, color: Colors.red),
-                    label: const Text(
-                      'Cancel Booking',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                    onPressed: () => _cancelBooking(context),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      side: const BorderSide(color: Colors.red),
-                    ),
+            if (isCancellable)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.cancel, color: Colors.red),
+                  label: const Text(
+                    'Cancel Booking',
+                    style: TextStyle(color: Colors.red),
                   ),
+                  onPressed: () => _confirmCancel(context, booking.id),
                 ),
               ),
           ],
@@ -206,16 +146,60 @@ class BookingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(IconData icon, String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey),
+          Icon(icon, size: 18, color: Colors.grey.shade600),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(width: 4),
+          Text('$title ', style: const TextStyle(fontWeight: FontWeight.w500)),
           Text(value),
+        ],
+      ),
+    );
+  }
+
+  void _confirmCancel(BuildContext context, String bookingId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Booking'),
+        content: const Text(
+          'Are you sure you want to cancel this reservation? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              try {
+                await BookingService().cancelBooking(bookingId);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Booking successfully canceled.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to cancel booking: $e')),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text(
+              'Yes, Cancel',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
       ),
     );

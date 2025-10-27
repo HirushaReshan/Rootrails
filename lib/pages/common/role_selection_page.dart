@@ -1,78 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:rootrails/pages/general_user/general_user_login_page.dart';
+import 'package:rootrails/pages/business_user/business_user_login_page.dart';
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
-
-  // Widget for a large, tappable role card
-  Widget _buildRoleCard({
-    required BuildContext context,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 10,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 60,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 15),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                subtitle,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Your Role'),
+        title: const Text('Choose Your Role'),
         automaticallyImplyLeading: false,
       ),
       body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
               Text(
-                'Are you planning a trip or offering one?',
-                style: Theme.of(context).textTheme.headlineSmall,
+                'Are you looking for a safari, or offering a service?',
                 textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 30),
-              _buildRoleCard(
-                context: context,
-                title: 'General User',
-                subtitle: 'Book exciting safaris and adventures!',
-                icon: Icons.person_search,
+              const SizedBox(height: 40),
+
+              // General User Button (Customer)
+              _buildRoleButton(
+                context,
+                icon: Icons.map,
+                title: 'Book a Safari (Customer)',
+                subtitle: 'Find drivers and reserve your spot.',
                 onTap: () {
                   Navigator.push(
                     context,
@@ -82,24 +41,72 @@ class RoleSelectionPage extends StatelessWidget {
                   );
                 },
               ),
-              _buildRoleCard(
-                context: context,
-                title: 'Business User (Driver)',
-                subtitle: 'Register your safari business and accept bookings.',
-                icon: Icons.drive_eta,
+              const SizedBox(height: 20),
+
+              // Business User Button (Driver)
+              _buildRoleButton(
+                context,
+                icon: Icons.directions_bus,
+                title: 'Offer Safari Service (Driver)',
+                subtitle: 'Manage your listings and orders.',
                 onTap: () {
-                  // TODO: Navigate to Business User Login Page
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const BusinessUserLoginPage()),
-                  // );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Business Login page coming soon!'),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BusinessUserLoginPage(),
                     ),
                   );
                 },
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleButton(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
             ],
           ),
         ),

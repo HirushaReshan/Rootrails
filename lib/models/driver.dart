@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Driver {
-  final String uid;
+  final String uid; // This is the Business User's UID
   final String businessName;
   final String driverImageUrl;
   final double rating;
@@ -9,6 +9,7 @@ class Driver {
   final double safariDurationHours;
   final bool isOpenNow;
   final String locationInfo;
+  final String businessDescription; // Added for detail page
 
   Driver({
     required this.uid,
@@ -19,8 +20,11 @@ class Driver {
     required this.safariDurationHours,
     required this.isOpenNow,
     required this.locationInfo,
+    required this.businessDescription,
   });
 
+  // This factory builds a Driver object from a 'parks' collection document
+  // (which is actually a business listing).
   factory Driver.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;
     if (data == null) throw Exception("Driver data not available.");
@@ -36,6 +40,8 @@ class Driver {
           (data['safari_duration_hours'] as num?)?.toDouble() ?? 3.0,
       isOpenNow: data['is_open'] ?? false,
       locationInfo: data['location_info'] ?? 'Park entrance',
+      businessDescription:
+          data['business_description'] ?? 'No description available.',
     );
   }
 }

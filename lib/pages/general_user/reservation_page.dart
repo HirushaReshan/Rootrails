@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rootrails/models/driver.dart';
+import 'package:rootrails/pages/general_user/dummy_payment_page.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
-import 'dummy_payment_page.dart';
 
 class ReservationPage extends StatefulWidget {
   final Driver driver;
   final String parkName;
-
-  const ReservationPage({super.key, required this.driver, required this.parkName});
+  const ReservationPage({
+    super.key,
+    required this.driver,
+    required this.parkName,
+  });
 
   @override
   State<ReservationPage> createState() => _ReservationPageState();
 }
 
 class _ReservationPageState extends State<ReservationPage> {
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
   final TextEditingController _notesController = TextEditingController();
-  DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
-  String? _selectedTime;
-  final List<String> _availableTimes = ['8:00 AM', '10:00 AM', '1:00 PM', '3:00 PM'];
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now().add(const Duration(days: 1)),
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null && picked != _selectedDate) {
@@ -34,53 +37,42 @@ class _ReservationPageState extends State<ReservationPage> {
     }
   }
 
-  void _bookNow() {
-    if (_selectedTime == null) {
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
+  void _proceedToPayment() {
+    if (!_formKey.currentState!.validate() ||
+        _selectedDate == null ||
+        _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a time slot.')),
+        const SnackBar(
+          content: Text('Please select a date and time to proceed.'),
+        ),
       );
       return;
     }
-    
-    // Navigate to the dummy payment page with booking details
+
+    // Format time for storage
+    final String formattedTime = _selectedTime!.format(context);
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => DummyPaymentPage(
           driver: widget.driver,
           parkName: widget.parkName,
-          bookingDate: _selectedDate,
-          bookingTime: _selectedTime!,
-          notes: _notesController.text,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeContainer(String time) {
-    final isSelected = _selectedTime == time;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTime = time;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
-            width: 1.5,
-          ),
-        ),
-        child: Text(
-          time,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+          bookingDate: _selectedDate!,
+          bookingTime: formattedTime,
+          notes: _notesController.text.trim(),
         ),
       ),
     );
@@ -88,8 +80,10 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final totalAmount = widget.driver.pricePerSafari;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Complete Reservation')),
+      appBar: AppBar(title: const Text('Confirm Reservation')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Form(
@@ -97,66 +91,81 @@ class _ReservationPageState extends State<ReservationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Summary Card
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Booking: ${widget.driver.businessName}',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 5),
-                      Text('Park: ${widget.parkName}', style: Theme.of(context).textTheme.bodyLarge),
-                      const SizedBox(height: 5),
-                      Text('Price: \$${widget.driver.pricePerSafari.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.primary)),
-                    ],
-                  ),
-                ),
+              Text(
+                'Booking with: ${widget.driver.businessName}',
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 30),
-
-              // Time Selection
-              Text('1. Select Available Time Slot', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 10.0,
-                runSpacing: 10.0,
-                children: _availableTimes.map((time) => _buildTimeContainer(time)).toList(),
+              Text(
+                'At: ${widget.parkName}',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.grey),
               ),
-              const SizedBox(height: 30),
+              const Divider(height: 30),
 
               // Date Selection
-              Text('2. Select Date', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 10),
-              ListTile(
-                title: Text(
-                  'Selected Date: ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _selectDate(context),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.grey.shade300),
-                ),
+              Text(
+                '1. Select Date',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
+              _buildDateTimePicker(
+                context,
+                icon: Icons.date_range,
+                title: _selectedDate == null
+                    ? 'Choose Date'
+                    : DateFormat('EEE, MMM d, yyyy').format(_selectedDate!),
+                onTap: () => _selectDate(context),
+              ),
+              const SizedBox(height: 20),
+
+              // Time Selection
+              Text(
+                '2. Select Time',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 10),
+              _buildDateTimePicker(
+                context,
+                icon: Icons.access_time,
+                title: _selectedTime == null
+                    ? 'Choose Time'
+                    : _selectedTime!.format(context),
+                onTap: () => _selectTime(context),
+              ),
+              const SizedBox(height: 20),
 
               // Notes
-              Text('3. Add Notes (Optional)', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                '3. Add Notes (Optional)',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 10),
               CustomTextField(
                 controller: _notesController,
-                hintText: 'e.g., specific pickup instructions, number of people...',
-                keyboardType: TextInputType.multiline,
+                hintText: 'e.g., Number of people, special requests...',
+                maxLines: 3,
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
+
+              // Price Summary
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total Price:',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  Text(
+                    '\$${totalAmount.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -164,16 +173,45 @@ class _ReservationPageState extends State<ReservationPage> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ElevatedButton(
-          onPressed: _bookNow,
+          onPressed: _proceedToPayment,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            minimumSize: const Size(double.infinity, 60),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
           child: const Text(
             'Proceed to Payment',
-            style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimePicker(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(12),
+          color: Theme.of(context).cardColor,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Theme.of(context).colorScheme.secondary),
+            const SizedBox(width: 10),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            const Icon(Icons.edit, size: 20, color: Colors.grey),
+          ],
         ),
       ),
     );

@@ -1,28 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rootrails/models/park.dart';
 import 'package:rootrails/models/driver.dart';
-import 'package:rootrails/pages/general_user/general_user_home_page.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'driver_detail_page.dart';
+import 'package:rootrails/pages/general_user/driver_detail_page.dart';
 
 class ParkDetailPage extends StatelessWidget {
   final Park park;
-
   const ParkDetailPage({super.key, required this.park});
-
-  // Function to open Google Maps
-  void _openMap(BuildContext context, String location) async {
-    final url = 'https://www.google.com/maps/search/?api=1&query=$location';
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Could not open map.')));
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,113 +16,81 @@ class ParkDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildParkInfoSection(context),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: Text(
-                'Available Drivers',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            // Park Header Image
+            Image.network(
+              park.imageUrl,
+              height: 250,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+
+            // Park Info Section
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    park.name,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.amber.shade700, size: 20),
+                      const SizedBox(width: 4),
+                      Text('${park.rating.toStringAsFixed(1)} Rating'),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.location_on,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      Text(park.location),
+                    ],
+                  ),
+                  const Divider(height: 30),
+                  Text(
+                    'Available Safari Drivers',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Driver List Section
+                  _buildDriverList(),
+                ],
               ),
             ),
-            _buildDriverList(context),
-            const SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildParkInfoSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            park.name,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Open: ${park.openTime}',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.star, color: Colors.amber.shade700),
-              const SizedBox(width: 4),
-              Text(
-                'Rating: ${park.rating.toStringAsFixed(1)}',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () => _openMap(
-                  context,
-                  park.name,
-                ), // Using park name as location query
-                icon: const Icon(Icons.location_on),
-                label: const Text('View on Map'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'About the Park: A beautiful destination for wildlife viewing and conservation. Check the open times before booking!',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDriverList(BuildContext context) {
-    // Fetch drivers associated with this park (Park ID is implicitly the park name/identifier)
-    // We are querying the 'parks' collection (which also holds business listings) for matching types/locations
+  Widget _buildDriverList() {
+    // Assuming the 'parks' collection contains documents which are driver listings,
+    // and we filter by drivers who are 'open' and associated with a park (in a real scenario, this filter would be more complex).
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('parks')
-          .where('business_type', isEqualTo: 'park')
-          .where(
-            'park_id',
-            isEqualTo: park.id,
-          ) // Assuming park.id is the unique park identifier
+          .where('business_type', isEqualTo: 'park') // Only show drivers
+          .where('is_open', isEqualTo: true) // Only show active drivers
+          // .where('park_id', isEqualTo: park.id) // Filter by park ID (if implemented)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(),
-            ),
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error fetching drivers: ${snapshot.error}'),
           );
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('No drivers registered for this park yet.'),
-            ),
+          return const Text(
+            'No drivers are currently available for booking at this park.',
           );
         }
 
@@ -151,90 +103,52 @@ class ParkDetailPage extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: drivers.length,
           itemBuilder: (context, index) {
-            return _buildDriverCard(context, drivers[index]);
+            return DriverCard(driver: drivers[index], parkName: park.name);
           },
         );
       },
     );
   }
+}
 
-  Widget _buildDriverCard(BuildContext context, Driver driver) {
+class DriverCard extends StatelessWidget {
+  final Driver driver;
+  final String parkName;
+
+  const DriverCard({super.key, required this.driver, required this.parkName});
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: ListTile(
+        leading: CircleAvatar(
+          radius: 30,
+          backgroundImage: NetworkImage(driver.driverImageUrl),
+        ),
+        title: Text(
+          driver.businessName,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Price: \$${driver.pricePerSafari.toStringAsFixed(2)}'),
+            Text('Duration: ${driver.safariDurationHours} hours'),
+          ],
+        ),
+        trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  DriverDetailPage(driver: driver, parkName: park.name),
+                  DriverDetailPage(driver: driver, parkName: parkName),
             ),
           );
         },
-        leading: CircleAvatar(
-          radius: 30,
-          backgroundImage: NetworkImage(driver.driverImageUrl),
-          onBackgroundImageError: (e, s) => const Icon(Icons.person, size: 30),
-        ),
-        title: Text(
-          driver.businessName,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.star, size: 16, color: Colors.amber.shade600),
-                const SizedBox(width: 4),
-                Text(driver.rating.toStringAsFixed(1)),
-                const SizedBox(width: 10),
-                Icon(
-                  Icons.timer,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Text('${driver.safariDurationHours} hrs'),
-              ],
-            ),
-            Text(
-              '${driver.locationInfo}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '\$${driver.pricePerSafari.toStringAsFixed(0)}',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: driver.isOpenNow
-                    ? Colors.green.shade500
-                    : Colors.red.shade500,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                driver.isOpenNow ? 'Open Now' : 'Closed',
-                style: const TextStyle(color: Colors.white, fontSize: 10),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

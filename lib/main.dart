@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-// Import your firebase_options.dart file where Firebase is configured
-// import 'firebase_options.dart';
+// Make sure you have your firebase_options.dart file from your Firebase setup
+// import 'firebase_options.dart'; 
 
 import 'theme/app_themes.dart';
 import 'pages/common/start_page.dart';
-import 'pages/general_user/general_user_home_page.dart'; // Will be created later
+import 'pages/general_user/general_user_home_page.dart';
+import 'pages/business_user/business_user_home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Assume you have your firebase_options.dart configured
+  // Ensure you have this file and uncomment the line
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
-  // Placeholder init for simplicity:
-  await Firebase.initializeApp();
-
+  // ); 
+  
+  // Placeholder for running without firebase_options.dart
+  await Firebase.initializeApp(); 
+  
   runApp(
-    ChangeNotifierProvider(create: (_) => ThemeService(), child: const MyApp()),
+    ChangeNotifierProvider(
+      create: (_) => ThemeService(),
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -31,7 +37,7 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeService>(
       builder: (context, themeService, child) {
         return MaterialApp(
-          title: 'Safari Booking App',
+          title: 'SafariGo',
           debugShowCheckedModeBanner: false,
           theme: themeService.themeData,
           home: const AuthWrapper(),
@@ -41,32 +47,81 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+// This wrapper checks auth state and then checks the user's role
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  @override
   Widget build(BuildContext context) {
-    // This stream listens to the Firebase Auth state
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Show loading indicator while connecting
+        // Show loading spinner
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
 
-        // Check if user is logged in
+        // If user is logged in
         if (snapshot.hasData) {
-          // TODO: Implement logic to check if user is General or Business.
-          // For now, we'll assume logged-in users go to the General User Home Page.
-          return const GeneralUserHomePage();
+          // Check their role from Firestore
+          return RoleCheckWrapper(user: snapshot.data!);
         }
 
-        // If no user is logged in, start the app flow
+        // If no user, show the Start Page (intro animation)
         return const StartPage();
       },
     );
   }
 }
+
+// This widget checks the role of the logged-in user
+class RoleCheckWrapper extends StatelessWidget {
+  final User user;
+  const RoleCheckWrapper({super.key, required this.user});
+
+  Future<String?> _getUserRole(String uid) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return doc.data()?['role'] as String?;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _getUserRole(user.uid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        if (snapshot.hasData) {
+          final role = snapshot.data;
+          // Route based on role
+          if (role == 'business_user') {
+            return const BusinessUserHomePage();
+          }
+          if (role == 'general_user') {
+            return const GeneralUserHomePage();
+          }
+        }
+        
+        // If role is not found or error, default to General User Home
+        // This handles cases like Google Sign-In where role might not be set yet
+        // or if the user document is corrupted.
+        // A better app might show an error page or force role selection.
+        return const GeneralUserHomePage();
+      },
+    );
+  }
+}/*  */

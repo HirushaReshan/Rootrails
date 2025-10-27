@@ -4,7 +4,7 @@ import 'package:rootrails/pages/general_user/reservation_page.dart';
 
 class DriverDetailPage extends StatelessWidget {
   final Driver driver;
-  final String parkName;
+  final String parkName; // Passed from ParkDetailPage for the booking context
 
   const DriverDetailPage({
     super.key,
@@ -16,170 +16,140 @@ class DriverDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(driver.businessName)),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Driver/Business Header
-                Center(
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundImage: NetworkImage(driver.driverImageUrl),
-                        onBackgroundImageError: (e, s) =>
-                            const Icon(Icons.person, size: 60),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        driver.businessName,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      _buildRatingRow(),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Location: ${driver.locationInfo}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        'Duration: ${driver.safariDurationHours} hours',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Driver Image Header
+            Container(
+              height: 250,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(driver.driverImageUrl),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.4),
+                    BlendMode.darken,
                   ),
                 ),
-                const Divider(height: 40),
-
-                // Detailed Info
-                Text(
-                  'Safari Details',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              child: Center(
+                child: Text(
+                  driver.businessName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                _buildInfoTile(
-                  context,
-                  Icons.price_change,
-                  'Base Price',
-                  '\$${driver.pricePerSafari.toStringAsFixed(2)} per booking',
-                  Colors.green,
-                ),
-                _buildInfoTile(
-                  context,
-                  Icons.verified,
-                  'Service Type',
-                  'Private Guided Safari in $parkName',
-                  Colors.blue,
-                ),
-                _buildInfoTile(
-                  context,
-                  Icons.access_time_filled,
-                  'Availability Status',
-                  driver.isOpenNow
-                      ? 'Available for booking today.'
-                      : 'Currently closed, check back later.',
-                  driver.isOpenNow ? Colors.green : Colors.red,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'About the Driver',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Experienced guide with over 10 years in the region. Specializing in finding the 'Big Five' and providing a comfortable, ethical safari experience.",
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 100), // Space for the floating button
-              ],
+              ),
             ),
-          ),
 
-          // Floating Reserve Now Button
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).scaffoldBackgroundColor.withOpacity(0.95),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailTile(
+                    context,
+                    Icons.location_on,
+                    'Pickup Location',
+                    driver.locationInfo.isEmpty ? 'N/A' : driver.locationInfo,
+                  ),
+                  _buildDetailTile(
+                    context,
+                    Icons.access_time,
+                    'Duration',
+                    '${driver.safariDurationHours} Hours',
+                  ),
+                  _buildDetailTile(
+                    context,
+                    Icons.monetization_on,
+                    'Price',
+                    '\$${driver.pricePerSafari.toStringAsFixed(2)} per trip',
+                  ),
+                  _buildDetailTile(
+                    context,
+                    Icons.star,
+                    'Rating',
+                    '${driver.rating.toStringAsFixed(1)} Stars',
+                  ),
+
+                  const Divider(height: 40),
+
+                  Text(
+                    'About the Service',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    driver.businessDescription,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
-              child: ElevatedButton(
-                onPressed: driver.isOpenNow
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ReservationPage(
-                              driver: driver,
-                              parkName: parkName,
-                            ),
-                          ),
-                        );
-                      }
-                    : null, // Disable button if closed
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  driver.isOpenNow
-                      ? 'Reserve Now - \$${driver.pricePerSafari.toStringAsFixed(2)}'
-                      : 'Unavailable',
-                  style: const TextStyle(fontSize: 18, color: Colors.white),
-                ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ElevatedButton.icon(
+          icon: const Icon(Icons.calendar_month),
+          label: const Text('Reserve Now', style: TextStyle(fontSize: 18)),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    ReservationPage(driver: driver, parkName: parkName),
               ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 60),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildRatingRow() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (index) {
-        return Icon(
-          index < driver.rating.floor() ? Icons.star : Icons.star_border,
-          color: Colors.amber,
-        );
-      }),
-    );
-  }
-
-  Widget _buildInfoTile(
+  Widget _buildDetailTile(
     BuildContext context,
     IconData icon,
     String title,
     String subtitle,
-    Color color,
   ) {
-    return ListTile(
-      leading: Icon(icon, color: color, size: 30),
-      title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-      subtitle: Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 2),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 100,
+                child: Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  softWrap: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

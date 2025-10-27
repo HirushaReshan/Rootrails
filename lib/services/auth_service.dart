@@ -3,7 +3,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+  // The 'email' scope is usually the minimum requirement. Add others as needed.
+  scopes: [
+    'email',
+  ],
+);
 
   // Get current user
   User? getCurrentUser() {
@@ -22,7 +27,6 @@ class AuthService {
       );
       return result.user;
     } on FirebaseAuthException catch (e) {
-      // Handle Firebase errors (e.g., weak-password, email-already-in-use)
       throw Exception(e.message);
     } catch (e) {
       throw Exception('An unknown error occurred during registration.');

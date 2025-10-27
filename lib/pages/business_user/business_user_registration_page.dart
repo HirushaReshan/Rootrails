@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
-import 'business_user_home_page.dart';
+import 'package:rootrails/pages/business_user/business_user_home_page.dart';
 
 class BusinessUserRegistrationPage extends StatefulWidget {
   const BusinessUserRegistrationPage({super.key});
@@ -15,100 +15,66 @@ class BusinessUserRegistrationPage extends StatefulWidget {
 class _BusinessUserRegistrationPageState
     extends State<BusinessUserRegistrationPage> {
   final _formKey = GlobalKey<FormState>();
-  final AuthService _authService = AuthService();
-  bool _isLoading = false;
-
-  // Controllers for Business Details
-  final TextEditingController _businessNameController = TextEditingController();
-  final TextEditingController _businessDescController = TextEditingController();
-  final TextEditingController _businessImageUrlController =
-      TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _driverImageUrlController =
-      TextEditingController();
-  final TextEditingController _durationController = TextEditingController();
-  final TextEditingController _locationInfoController = TextEditingController();
-
-  // Controllers for Auth Details
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _businessNameController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
-  String? _businessType = 'park'; // Default to 'park'
-  final List<String> _businessTypes = ['park', 'other_business'];
+  bool _isLoading = false;
+  bool _isPasswordVisible = false;
 
-  // Placeholder for Park ID selection (assuming a static list for now)
-  String? _parkId = 'masai_mara';
-  final List<Map<String, String>> _availableParks = [
-    {'id': 'masai_mara', 'name': 'Masai Mara'},
-    {'id': 'serengeti', 'name': 'Serengeti'},
-    {'id': 'other', 'name': 'Other (No Park ID)'},
-  ];
-
-  Future<void> _registerBusiness() async {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Passwords do not match.')));
-      return;
-    }
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 1. Register user in Firebase Auth
-      final user = await _authService.signUpWithEmail(
+      final user = await AuthService().signUpWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
       if (user != null) {
-        // 2. Create user/business document in Firestore
-        // Note: For simplicity, storing driver/business details in the 'users' collection with role 'business_user'
-        // and also creating a public entry in 'parks'/'businesses' for listing.
-
-        final businessData = {
+        // 2. Save business details to Firestore in the 'parks' collection for listing
+        await FirebaseFirestore.instance.collection('parks').doc(user.uid).set({
           'uid': user.uid,
           'email': _emailController.text.trim(),
           'role': 'business_user',
-
-          // Business Details
           'business_name': _businessNameController.text.trim(),
-          'business_description': _businessDescController.text.trim(),
-          'business_image_url': _businessImageUrlController.text.trim(),
+          'business_description': _descriptionController.text.trim(),
           'price_per_safari': double.tryParse(_priceController.text) ?? 0.0,
-          'driver_image_url': _driverImageUrlController.text.trim(),
-          'safari_duration_hours':
-              double.tryParse(_durationController.text) ?? 0.0,
-          'location_info': _locationInfoController.text.trim(),
-          'business_type': _businessType,
-          'park_id': _parkId == 'other' ? '' : _parkId,
+          'safari_duration_hours': 3.0, // Default value
+          'location_info': 'Main Park Entrance', // Default value
           'is_open': false, // Starts as closed
-          'rating': 0.0, // Initial rating
+          'business_type': 'park', // Default to 'park' type
+          'park_id': 'default_park_id', // Placeholder
+          'rating': 0.0,
+          'business_image_url':
+              'https://via.placeholder.com/300/FFA000/FFFFFF?text=Safari+Service',
+          'driver_image_url':
+              'https://via.placeholder.com/150/FF9800/FFFFFF?text=Driver',
           'created_at': FieldValue.serverTimestamp(),
-        };
+        });
 
-        // Create the user document
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set(businessData);
-
-        // Create the public park/business listing (using the user's UID as the document ID)
-        await FirebaseFirestore.instance.collection('parks').doc(user.uid).set({
-          ...businessData,
-          'type': _businessType, // Public listing type
-          'name': _businessNameController.text.trim(),
-          'image_url': _businessImageUrlController.text.trim(),
-          'open_time': 'Varies (Driver-controlled)',
+        // 3. Save minimum user document for role checking in main.dart
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': _emailController.text.trim(),
+          'role': 'business_user',
+          'full_name': _businessNameController.text.trim(),
         });
 
         if (mounted) {
-          // Navigate to Business Home Page on success
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Registration successful! Please update your full profile.',
+              ),
+            ),
+          );
+          // Navigate to Home Page
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => const BusinessUserHomePage(),
@@ -117,10 +83,14 @@ class _BusinessUserRegistrationPageState
           );
         }
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          SnackBar(
+            content: Text(
+              'Registration Failed: ${e.toString().split(':').last.trim()}',
+            ),
+          ),
         );
       }
     } finally {
@@ -142,180 +112,103 @@ class _BusinessUserRegistrationPageState
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
                 Text(
-                  'Register Your Safari Service',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  'List Your Safari Service',
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 30),
 
-                // --- Business Details ---
-                const Text(
-                  'Business Details',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const Divider(),
+                // Business Name
                 CustomTextField(
                   controller: _businessNameController,
-                  hintText: 'Business Name',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 15),
-                CustomTextField(
-                  controller: _businessDescController,
-                  hintText: 'Business Description',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 15),
-                CustomTextField(
-                  controller: _businessImageUrlController,
-                  hintText: 'Business Image URL (for listing)',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 15),
-                CustomTextField(
-                  controller: _driverImageUrlController,
-                  hintText: 'Driver Image URL',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 15),
-                CustomTextField(
-                  controller: _priceController,
-                  hintText: 'Price for a Booking (e.g., 150.00)',
-                  keyboardType: TextInputType.number,
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 15),
-                CustomTextField(
-                  controller: _durationController,
-                  hintText: 'Safari Duration (Hours, e.g., 4.5)',
-                  keyboardType: TextInputType.number,
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 15),
-                CustomTextField(
-                  controller: _locationInfoController,
-                  hintText: 'Location Info / Pickup Point',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  hintText: 'Business/Driver Name',
+                  validator: (v) =>
+                      v!.isEmpty ? 'Business name is required' : null,
                 ),
                 const SizedBox(height: 20),
 
-                // Business Type Selection
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: 'Business Category',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  value: _businessType,
-                  items: _businessTypes.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Text(
-                        type == 'park'
-                            ? 'Park Driver/Guide'
-                            : 'Other Business/Activity',
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _businessType = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Park ID Selection (Only if type is 'park')
-                if (_businessType == 'park')
-                  DropdownButtonFormField<String>(
-                    decoration: InputDecoration(
-                      labelText: 'Primary Park',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    value: _parkId,
-                    items: _availableParks.map((park) {
-                      return DropdownMenuItem(
-                        value: park['id'],
-                        child: Text(park['name']!),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _parkId = value;
-                      });
-                    },
-                    validator: (v) =>
-                        v!.isEmpty ? 'Please select a primary park.' : null,
-                  ),
-                const SizedBox(height: 30),
-
-                // --- Account Details ---
-                const Text(
-                  'Account Details',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const Divider(),
+                // Email Field
                 CustomTextField(
                   controller: _emailController,
-                  hintText: 'Login Email',
+                  hintText: 'Email',
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) => v!.isEmpty || !v.contains('@')
                       ? 'Enter a valid email'
                       : null,
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
+
+                // Password Field
                 CustomTextField(
                   controller: _passwordController,
                   hintText: 'Password',
-                  obscureText: true,
+                  obscureText: !_isPasswordVisible,
                   validator: (v) => v!.length < 6
                       ? 'Password must be at least 6 characters'
                       : null,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                  ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
+
+                // Price and Description
                 CustomTextField(
-                  controller: _confirmPasswordController,
-                  hintText: 'Confirm Password',
-                  obscureText: true,
-                  validator: (v) => v != _passwordController.text
-                      ? 'Passwords do not match'
+                  controller: _priceController,
+                  hintText: 'Price per Safari (e.g., 150.00)',
+                  keyboardType: TextInputType.number,
+                  validator: (v) => v!.isEmpty || double.tryParse(v) == null
+                      ? 'Enter a valid price'
                       : null,
+                ),
+                const SizedBox(height: 20),
+
+                CustomTextField(
+                  controller: _descriptionController,
+                  hintText: 'Short Service Description',
+                  maxLines: 3,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Description is required' : null,
                 ),
                 const SizedBox(height: 30),
 
                 // Register Button
                 _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
+                    ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: _registerBusiness,
+                        onPressed: _register,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.secondary,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 5,
                         ),
                         child: const Text(
-                          'Register Business',
-                          style: TextStyle(fontSize: 18, color: Colors.white),
+                          'Register Service',
+                          style: TextStyle(fontSize: 18),
                         ),
                       ),
+
                 const SizedBox(height: 20),
+
+                // Login Link
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Already registered? Sign In'),
+                ),
               ],
             ),
           ),

@@ -1,6 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'role_selection_page.dart';
+import 'package:rootrails/pages/common/role_selection_page.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -9,68 +8,114 @@ class StartPage extends StatefulWidget {
   State<StartPage> createState() => _StartPageState();
 }
 
-class _StartPageState extends State<StartPage> {
-  double _opacity = 0.0;
+class _StartPageState extends State<StartPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    // Start animation and timer
-    Timer(const Duration(milliseconds: 500), () {
-      setState(() {
-        _opacity = 1.0;
-      });
-    });
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
 
-    Timer(const Duration(seconds: 4), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+      ),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
         );
-      }
-    });
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: AnimatedOpacity(
-          opacity: _opacity,
-          duration: const Duration(seconds: 2),
-          curve: Curves.easeIn,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Placeholder for the App Logo/Animation
-              Icon(
-                Icons.directions_car_filled,
-                size: 100,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'SafariGo',
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 10.0,
-                      color: Colors.black.withOpacity(0.3),
-                      offset: const Offset(3.0, 3.0),
+      body: Container(
+        decoration: const BoxDecoration(
+          // Simple gradient for a welcoming look
+          gradient: LinearGradient(
+            colors: [Color(0xFF8BC34A), Color(0xFF4CAF50)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: FadeTransition(
+              opacity: _opacityAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.directions_car_filled,
+                    size: 100,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'SafariGo',
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [Shadow(blurRadius: 5.0, color: Colors.black26)],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Your Adventure Awaits',
+                    style: TextStyle(fontSize: 18, color: Colors.white70),
+                  ),
+                  const SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RoleSelectionPage(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 15,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 8,
+                    ),
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Your Wild Adventure Awaits',
-                style: TextStyle(fontSize: 16, color: Colors.white70),
-              ),
-            ],
+            ),
           ),
         ),
       ),

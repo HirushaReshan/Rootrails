@@ -18,10 +18,13 @@ class NavigationPage extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'This page is reserved for future integration with map APIs (e.g., Google Maps) for driver/safari tracking.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40.0),
+              child: Text(
+                'This page is reserved for future integration with map APIs (e.g., Google Maps) for driver/safari tracking.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(

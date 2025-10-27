@@ -1,16 +1,13 @@
-// File: lib/widgets/user_drawer.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rootrails/pages/common/contact_us_page.dart';
-import 'package:rootrails/pages/common/role_selection_page.dart';
-import 'package:rootrails/pages/common/settings_page.dart';
-import 'package:rootrails/pages/general_user/my_list_page.dart';
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/theme/app_themes.dart';
+import 'package:rootrails/pages/common/role_selection_page.dart';
+import 'package:rootrails/pages/general_user/my_list_page.dart';
+import 'package:rootrails/pages/common/settings_page.dart';
+import 'package:rootrails/pages/common/contact_us_page.dart';
 
 class UserDrawer extends StatelessWidget {
-  // Note: Class name is UserDrawer
   final String userName;
   final String userEmail;
 
@@ -46,17 +43,13 @@ class UserDrawer extends StatelessWidget {
             title: const Text('My Bookings'),
             onTap: () {
               Navigator.pop(context);
-              // Note: You would typically route to the home page with index 1 here,
-              // but for direct navigation from the drawer, we use a placeholder or
-              // ensure the home page handles navigation via key/index.
-              // For simplicity, we navigate directly to the page for testing:
+              // Direct navigation for simplicity in the drawer
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MyListPage()),
               );
             },
           ),
-          // NEW LINKS
           ListTile(
             leading: const Icon(Icons.contact_support),
             title: const Text('Contact Us'),
@@ -80,12 +73,11 @@ class UserDrawer extends StatelessWidget {
             },
           ),
           const Divider(),
-          // Theme Switcher Logic (reused)
+          // Theme Switcher Logic
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                // ... (Theme switch logic remains here)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

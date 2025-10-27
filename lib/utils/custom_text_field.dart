@@ -4,18 +4,22 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final bool obscureText;
+  final TextInputType keyboardType;
+  final int maxLines;
+  final String? Function(String?)? validator;
+  final bool enabled;
   final Widget? suffixIcon;
-  final FormFieldValidator<String>? validator;
-  final TextInputType? keyboardType;
 
   const CustomTextField({
     super.key,
     required this.controller,
     required this.hintText,
     this.obscureText = false,
-    this.suffixIcon,
+    this.keyboardType = TextInputType.text,
+    this.maxLines = 1,
     this.validator,
-    this.keyboardType,
+    this.enabled = true,
+    this.suffixIcon,
   });
 
   @override
@@ -23,39 +27,34 @@ class CustomTextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
-      validator: validator,
       keyboardType: keyboardType,
-      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+      maxLines: maxLines,
+      enabled: enabled,
+      validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(
-          color: Theme.of(context).textTheme.bodyMedium?.color,
-        ),
-        filled: true,
-        fillColor: Theme.of(context).colorScheme.surface,
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide.none,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 15,
+          horizontal: 20,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2.0,
-          ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade400),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.surface,
-            width: 1.0,
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
           ),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16.0,
-          horizontal: 20.0,
-        ),
+        fillColor: enabled ? Theme.of(context).cardColor : Colors.grey.shade100,
+        filled: true,
       ),
     );
   }

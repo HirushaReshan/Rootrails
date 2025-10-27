@@ -11,6 +11,7 @@ class Booking {
   final double totalAmount;
   final String notes;
   final String status; // 'pending', 'confirmed', 'canceled', 'completed'
+  final String userFullName; // For driver to see
 
   Booking({
     required this.id,
@@ -22,7 +23,8 @@ class Booking {
     required this.bookingTime,
     required this.totalAmount,
     required this.notes,
-    this.status = 'pending',
+    required this.status,
+    required this.userFullName,
   });
 
   factory Booking.fromFirestore(DocumentSnapshot doc) {
@@ -40,6 +42,7 @@ class Booking {
       totalAmount: (data['total_amount'] as num?)?.toDouble() ?? 0.0,
       notes: data['notes'] ?? '',
       status: data['status'] ?? 'pending',
+      userFullName: data['user_full_name'] ?? 'N/A',
     );
   }
 
@@ -54,6 +57,7 @@ class Booking {
       'total_amount': totalAmount,
       'notes': notes,
       'status': status,
+      'user_full_name': userFullName,
       'created_at': FieldValue.serverTimestamp(),
     };
   }

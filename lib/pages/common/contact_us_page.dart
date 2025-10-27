@@ -7,15 +7,24 @@ class ContactUsPage extends StatelessWidget {
   void _launchEmail() async {
     const emailUrl =
         'mailto:support@safari-booker.com?subject=App%20Support%20Request';
-    if (await canLaunchUrlString(emailUrl)) {
-      await launchUrlString(emailUrl);
+    // Use canLaunchUrlString/launchUrlString for web/phone
+    try {
+      if (await canLaunchUrlString(emailUrl)) {
+        await launchUrlString(emailUrl);
+      }
+    } catch (e) {
+      debugPrint('Could not launch email: $e');
     }
   }
 
   void _launchPhone() async {
     const phoneUrl = 'tel:+254700000000';
-    if (await canLaunchUrlString(phoneUrl)) {
-      await launchUrlString(phoneUrl);
+    try {
+      if (await canLaunchUrlString(phoneUrl)) {
+        await launchUrlString(phoneUrl);
+      }
+    } catch (e) {
+      debugPrint('Could not launch phone: $e');
     }
   }
 

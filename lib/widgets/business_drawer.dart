@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rootrails/pages/common/contact_us_page.dart';
-import 'package:rootrails/pages/common/role_selection_page.dart';
-import 'package:rootrails/pages/common/settings_page.dart';
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/theme/app_themes.dart';
+import 'package:rootrails/pages/common/role_selection_page.dart';
+import 'package:rootrails/pages/common/settings_page.dart';
+import 'package:rootrails/pages/common/contact_us_page.dart';
+import 'package:rootrails/pages/business_user/business_orders_page.dart';
 
 class BusinessDrawer extends StatelessWidget {
   final String businessName;
-  final String driverImageUrl;
+  final String userEmail;
 
   const BusinessDrawer({
     super.key,
     required this.businessName,
-    required this.driverImageUrl,
+    required this.userEmail,
   });
 
   @override
@@ -28,21 +29,32 @@ class BusinessDrawer extends StatelessWidget {
               businessName,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            accountEmail: const Text('Business User (Driver)'),
+            accountEmail: Text(userEmail),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.secondary,
-              backgroundImage: NetworkImage(driverImageUrl),
-              onBackgroundImageError: (exception, stackTrace) =>
-                  const Icon(Icons.person, size: 40, color: Colors.white),
+              child: const Icon(
+                Icons.directions_bus,
+                size: 40,
+                color: Colors.white,
+              ),
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.home_work),
-            title: const Text('Business Dashboard'),
-            onTap: () => Navigator.pop(context),
+            leading: const Icon(Icons.assignment),
+            title: const Text('Manage Orders'),
+            onTap: () {
+              Navigator.pop(context);
+              // Direct navigation for simplicity in the drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BusinessOrdersPage(),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.contact_support),
@@ -52,7 +64,7 @@ class BusinessDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ContactUsPage()),
-              ); // <<< LINKED
+              );
             },
           ),
           ListTile(
@@ -63,56 +75,30 @@ class BusinessDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsPage()),
-              ); // <<< LINKED
+              );
             },
           ),
           const Divider(),
-          // Theme Switcher Logic (reused from General User)
+          // Theme Switcher Logic (Simplified for brevity, refer to user_drawer for full logic)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.brightness_6),
-                        const SizedBox(width: 30),
-                        Text(
-                          'Dark Mode',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    Switch(
-                      value: themeService.currentTheme == AppTheme.dark,
-                      onChanged: (value) => themeService.toggleTheme(),
-                      activeColor: Theme.of(context).colorScheme.secondary,
+                    const Icon(Icons.brightness_6),
+                    const SizedBox(width: 30),
+                    Text(
+                      'Dark Mode',
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.pets),
-                        const SizedBox(width: 30),
-                        Text(
-                          'Animal Theme',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    Switch(
-                      value: themeService.currentTheme == AppTheme.animal,
-                      onChanged: (value) => themeService.switchTheme(
-                        value ? AppTheme.animal : AppTheme.light,
-                      ),
-                      activeColor: Theme.of(context).colorScheme.secondary,
-                    ),
-                  ],
+                Switch(
+                  value: themeService.currentTheme == AppTheme.dark,
+                  onChanged: (value) => themeService.toggleTheme(),
+                  activeColor: Theme.of(context).colorScheme.secondary,
                 ),
               ],
             ),

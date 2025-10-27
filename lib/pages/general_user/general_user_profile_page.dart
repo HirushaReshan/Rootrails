@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rootrails/models/general_user.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
 
 class GeneralUserProfilePage extends StatefulWidget {
@@ -39,7 +40,8 @@ class _GeneralUserProfilePageState extends State<GeneralUserProfilePage> {
       final user = GeneralUser.fromFirestore(doc);
       setState(() {
         _userProfile = user;
-        _nameController.text = user.fullName;
+        // Use full_name from Firestore, but controllers use local state
+        _nameController.text = '${user.firstName} ${user.lastName}';
         _phoneController.text = user.phoneNumber;
         _bioController.text = user.bio;
         _isLoading = false;
@@ -58,12 +60,19 @@ class _GeneralUserProfilePageState extends State<GeneralUserProfilePage> {
       _isLoading = true;
     });
 
+    // Simple split for first/last name update (needs robustness for real app)
+    final List<String> names = _nameController.text.trim().split(' ');
+    final String firstName = names.isNotEmpty ? names.first : '';
+    final String lastName = names.length > 1 ? names.sublist(1).join(' ') : '';
+
     try {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(firebaseUser!.uid)
           .update({
             'full_name': _nameController.text.trim(),
+            'first_name': firstName,
+            'last_name': lastName,
             'phone_number': _phoneController.text.trim(),
             'bio': _bioController.text.trim(),
             'updated_at': FieldValue.serverTimestamp(),
@@ -115,10 +124,11 @@ class _GeneralUserProfilePageState extends State<GeneralUserProfilePage> {
             onPressed: () {
               if (_isEditing) {
                 _updateProfile();
+              } else {
+                setState(() {
+                  _isEditing = !_isEditing;
+                });
               }
-              setState(() {
-                _isEditing = !_isEditing;
-              });
             },
           ),
         ],
@@ -206,15 +216,15 @@ class _GeneralUserProfilePageState extends State<GeneralUserProfilePage> {
   }
 
   Widget _buildReadOnlyFields(BuildContext context) {
+    // Re-fetch full name from the controller's current text or stored model
+    final String currentFullName = _nameController.text.isEmpty
+        ? '${_userProfile!.firstName} ${_userProfile!.lastName}'
+        : _nameController.text;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDetailTile(
-          context,
-          Icons.person,
-          'Full Name',
-          _userProfile!.fullName,
-        ),
+        _buildDetailTile(context, Icons.person, 'Full Name', currentFullName),
         _buildDetailTile(
           context,
           Icons.phone,
