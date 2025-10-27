@@ -1,14 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart'; // Removed Google Sign-In import
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-  // The 'email' scope is usually the minimum requirement. Add others as needed.
-  scopes: [
-    'email',
-  ],
-);
+  // final GoogleSignIn _googleSignIn = GoogleSignIn( // Removed GoogleSignIn field
+  //   scopes: [
+  //     'email', // Add necessary scopes here
+  //   ],
+  // );
 
   // Get current user
   User? getCurrentUser() {
@@ -51,27 +50,29 @@ class AuthService {
     }
   }
 
-  // Google Sign In
-  Future<User?> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // User cancelled the sign-in
+  // // Removed Google Sign In method:
+  // Future<User?> signInWithGoogle() async {
+  //   try {
+  //     // Correct API call for modern google_sign_in package
+  //     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  //     if (googleUser == null) return null; // User cancelled the sign-in
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       // Correct getter for modern google_sign_in package
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
 
-      UserCredential result = await _auth.signInWithCredential(credential);
-      return result.user;
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
-    } catch (e) {
-      throw Exception('An unknown error occurred during Google sign in.');
-    }
-  }
+  //     UserCredential result = await _auth.signInWithCredential(credential);
+  //     return result.user;
+  //   } on FirebaseAuthException catch (e) {
+  //     throw Exception(e.message);
+  //   } catch (e) {
+  //     throw Exception('An unknown error occurred during Google sign in.');
+  //   }
+  // }
 
   // Password Reset
   Future<void> sendPasswordResetEmail(String email) async {
@@ -86,7 +87,7 @@ class AuthService {
 
   // Sign Out
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    // await _googleSignIn.signOut(); // Removed Google Sign-Out call
     await _auth.signOut();
   }
 }

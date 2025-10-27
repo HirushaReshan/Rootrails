@@ -10,6 +10,7 @@ final ThemeData lightTheme = ThemeData(
   primarySwatch: Colors.green,
   scaffoldBackgroundColor: const Color(0xFFF5F5F5), // Light grey background
   appBarTheme: const AppBarTheme(
+    // Already correct
     color: Colors.green,
     iconTheme: IconThemeData(color: Colors.white),
     titleTextStyle: TextStyle(
@@ -18,12 +19,19 @@ final ThemeData lightTheme = ThemeData(
       fontWeight: FontWeight.w600,
     ),
   ),
-  cardTheme: const CardTheme(
+  // FIXED: Using CardThemeData instead of CardTheme
+  cardTheme: const CardThemeData(
+    // <-- FIX APPLIED HERE
     color: Colors.white,
     elevation: 4,
-    // FIX: Using const constructors for BorderRadius
-    shape: const RoundedRectangleBorder(
-      borderRadius: const BorderRadius.all(Radius.circular(12)),
+    // FIXED: Removed redundant nested const
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
+        bottomLeft: Radius.circular(12),
+        bottomRight: Radius.circular(12),
+      ),
     ),
   ),
   textTheme: const TextTheme(
@@ -49,21 +57,31 @@ final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   primarySwatch: Colors.blueGrey,
   scaffoldBackgroundColor: Colors.grey.shade900,
-  appBarTheme: AppBarTheme(
-    color: Colors.blueGrey.shade900,
-    iconTheme: const IconThemeData(color: Colors.white),
-    titleTextStyle: const TextStyle(
+  // FIX 3: Added const to AppBarTheme
+  appBarTheme: const AppBarTheme(
+    color: Color(
+      0xFF263238,
+    ), // Colors.blueGrey.shade900 is dynamic, replaced with const
+    iconTheme: IconThemeData(color: Colors.white),
+    titleTextStyle: TextStyle(
       color: Colors.white,
       fontSize: 20,
       fontWeight: FontWeight.w600,
     ),
   ),
-  cardTheme: const CardTheme(
-    color: const Color(0xFF424242), // Colors.grey.shade800 equivalent
+  // FIXED: Using CardThemeData instead of CardTheme
+  cardTheme: const CardThemeData(
+    // <-- FIX APPLIED HERE
+    color: const Color(0xFF424242), // Colors.grey.shade800 const equivalent
     elevation: 4,
-    // FIX: Using const constructors for BorderRadius
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12)),
+    // FIXED: Removed redundant nested const
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
+        bottomLeft: Radius.circular(12),
+        bottomRight: Radius.circular(12),
+      ),
     ),
   ),
   textTheme: TextTheme(
@@ -96,21 +114,29 @@ final ThemeData animalTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.deepOrange,
   scaffoldBackgroundColor: const Color(0xFFFFF8E1), // Light yellow/sand
-  appBarTheme: AppBarTheme(
-    color: Colors.brown.shade700,
-    iconTheme: const IconThemeData(color: Colors.white),
-    titleTextStyle: const TextStyle(
+  // FIX 3: Added const to AppBarTheme
+  appBarTheme: const AppBarTheme(
+    color: Color(0xFF5D4037), // Colors.brown.shade700 const equivalent
+    iconTheme: IconThemeData(color: Colors.white),
+    titleTextStyle: TextStyle(
       color: Colors.white,
       fontSize: 20,
       fontWeight: FontWeight.bold,
     ),
   ),
-  cardTheme: const CardTheme(
+  // FIXED: Using CardThemeData instead of CardTheme
+  cardTheme: const CardThemeData(
+    // <-- FIX APPLIED HERE
     color: const Color(0xFFFFFDE7), // Very light yellow
     elevation: 6,
-    // FIX: Using const constructors for BorderRadius
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
+    // FIXED: Removed redundant nested const
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16),
+        topRight: Radius.circular(16),
+        bottomLeft: Radius.circular(16),
+        bottomRight: Radius.circular(16),
+      ),
     ),
   ),
   textTheme: TextTheme(
@@ -178,6 +204,7 @@ class ThemeService with ChangeNotifier {
       (e) => e.toString().split('.').last == themeString,
       orElse: () => AppTheme.light,
     );
+    // Notify listeners so the UI updates immediately after loading the theme
     notifyListeners();
   }
 

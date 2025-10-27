@@ -3,8 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-// Make sure you have your firebase_options.dart file from your Firebase setup
-// import 'firebase_options.dart'; 
+// FIX: Import the generated options file
+import 'firebase_options.dart';
 
 import 'theme/app_themes.dart';
 import 'pages/common/start_page.dart';
@@ -13,19 +13,13 @@ import 'pages/business_user/business_user_home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Ensure you have this file and uncomment the line
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // ); 
-  
-  // Placeholder for running without firebase_options.dart
-  await Firebase.initializeApp(); 
-  
+
+  // FIX: Initialize Firebase using the default platform options
+  // This resolves the "options != null" assertion error on web.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeService(),
-      child: const MyApp(),
-    ),
+    ChangeNotifierProvider(create: (_) => ThemeService(), child: const MyApp()),
   );
 }
 
@@ -63,7 +57,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
       builder: (context, snapshot) {
         // Show loading spinner
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         // If user is logged in
@@ -86,7 +82,10 @@ class RoleCheckWrapper extends StatelessWidget {
 
   Future<String?> _getUserRole(String uid) async {
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
       if (doc.exists) {
         return doc.data()?['role'] as String?;
       }
@@ -102,7 +101,9 @@ class RoleCheckWrapper extends StatelessWidget {
       future: _getUserRole(user.uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasData) {
@@ -115,7 +116,7 @@ class RoleCheckWrapper extends StatelessWidget {
             return const GeneralUserHomePage();
           }
         }
-        
+
         // If role is not found or error, default to General User Home
         // This handles cases like Google Sign-In where role might not be set yet
         // or if the user document is corrupted.
@@ -124,4 +125,4 @@ class RoleCheckWrapper extends StatelessWidget {
       },
     );
   }
-}/*  */
+}
