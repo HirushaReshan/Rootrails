@@ -6,7 +6,17 @@ class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(title: Text(title), actions: [IconButton(onPressed: () { /* TODO notifications */ }, icon: const Icon(Icons.notifications))]);
+    return AppBar(
+      title: Text(title),
+      actions: [
+        IconButton(
+          onPressed: () {
+            /* TODO notifications */
+          },
+          icon: const Icon(Icons.notifications),
+        ),
+      ],
+    );
   }
 
   @override

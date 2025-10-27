@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:rootrails/all_things.dart';
+import 'package:rootrails/screens/auth/choice_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -18,12 +18,22 @@ class _BusinessLoginState extends State<BusinessLogin> {
   Future<void> _login() async {
     setState(() => _loading = true);
     try {
-      await FirebaseService.signInWithEmail(_email.text.trim(), _pass.text.trim());
+      await FirebaseService.signInWithEmail(
+        _email.text.trim(),
+        _pass.text.trim(),
+      );
       // For now navigate to BusinessHome which you will implement later
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const UserHomePage()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const UserHomePage()),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally { setState(() => _loading = false); }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -32,14 +42,32 @@ class _BusinessLoginState extends State<BusinessLogin> {
       appBar: AppBar(title: const Text('Business Login')),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Column(children: [
-          TextField(controller: _email, decoration: const InputDecoration(labelText: 'Email')),
-          TextField(controller: _pass, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-          const SizedBox(height: 12),
-          ElevatedButton(onPressed: _loading ? null : _login, child: const Text('Login')),
-          const SizedBox(height: 12),
-          TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BusinessRegister())), child: const Text('Register Business'))
-        ]),
+        child: Column(
+          children: [
+            TextField(
+              controller: _email,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _pass,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _loading ? null : _login,
+              child: const Text('Login'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BusinessRegister()),
+              ),
+              child: const Text('Register Business'),
+            ),
+          ],
+        ),
       ),
     );
   }

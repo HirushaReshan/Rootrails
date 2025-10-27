@@ -23,10 +23,18 @@ class _BusinessRegisterState extends State<BusinessRegister> {
   bool _loading = false;
 
   Future<void> _register() async {
-    if (_pass.text != _confirm.text) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match'))); return; }
+    if (_pass.text != _confirm.text) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
     setState(() => _loading = true);
     try {
-      final cred = await FirebaseService.registerWithEmail(_email.text.trim(), _pass.text.trim());
+      final cred = await FirebaseService.registerWithEmail(
+        _email.text.trim(),
+        _pass.text.trim(),
+      );
       final uid = cred.user!.uid;
       await FirebaseService.createBusinessDocument(uid, {
         'business_name': _name.text.trim(),
@@ -41,8 +49,12 @@ class _BusinessRegisterState extends State<BusinessRegister> {
       });
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally { setState(() => _loading = false); }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -51,20 +63,63 @@ class _BusinessRegisterState extends State<BusinessRegister> {
       appBar: AppBar(title: const Text('Register Business')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12.0),
-        child: Column(children: [
-          TextField(controller: _name, decoration: const InputDecoration(labelText: 'Business name')),
-          TextField(controller: _desc, decoration: const InputDecoration(labelText: 'Description')),
-          TextField(controller: _image, decoration: const InputDecoration(labelText: 'Business image URL')),
-          TextField(controller: _driverImage, decoration: const InputDecoration(labelText: 'Driver image URL')),
-          TextField(controller: _price, decoration: const InputDecoration(labelText: 'Price')),
-          TextField(controller: _duration, decoration: const InputDecoration(labelText: 'Duration (e.g. 3 hours)')),
-          TextField(controller: _location, decoration: const InputDecoration(labelText: 'Location (maps url)')),
-          TextField(controller: _email, decoration: const InputDecoration(labelText: 'Email')),
-          TextField(controller: _pass, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-          TextField(controller: _confirm, decoration: const InputDecoration(labelText: 'Confirm Password'), obscureText: true),
-          const SizedBox(height: 12),
-          ElevatedButton(onPressed: _loading ? null : _register, child: const Text('Register'))
-        ]),
+        child: Column(
+          children: [
+            TextField(
+              controller: _name,
+              decoration: const InputDecoration(labelText: 'Business name'),
+            ),
+            TextField(
+              controller: _desc,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            TextField(
+              controller: _image,
+              decoration: const InputDecoration(
+                labelText: 'Business image URL',
+              ),
+            ),
+            TextField(
+              controller: _driverImage,
+              decoration: const InputDecoration(labelText: 'Driver image URL'),
+            ),
+            TextField(
+              controller: _price,
+              decoration: const InputDecoration(labelText: 'Price'),
+            ),
+            TextField(
+              controller: _duration,
+              decoration: const InputDecoration(
+                labelText: 'Duration (e.g. 3 hours)',
+              ),
+            ),
+            TextField(
+              controller: _location,
+              decoration: const InputDecoration(
+                labelText: 'Location (maps url)',
+              ),
+            ),
+            TextField(
+              controller: _email,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            TextField(
+              controller: _pass,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _confirm,
+              decoration: const InputDecoration(labelText: 'Confirm Password'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _loading ? null : _register,
+              child: const Text('Register'),
+            ),
+          ],
+        ),
       ),
     );
   }
