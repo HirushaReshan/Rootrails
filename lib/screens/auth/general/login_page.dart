@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../user/user_home.dart';
-import '../../auth/choice_screen.dart';
 import 'register_page.dart';
 import '../../../services/firebase_service.dart';
 

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'services/firebase_service.dart';
 import 'screens/splash_screen.dart';
 import 'themes/app_theme.dart';
-import 'screens/auth/choice_screen.dart';
 
 // NOTE: Replace with your generated firebase_options.dart import if you have it.
 // import 'firebase_options.dart';

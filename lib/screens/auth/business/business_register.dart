@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/firebase_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class BusinessRegister extends StatefulWidget {
   const BusinessRegister({super.key});
