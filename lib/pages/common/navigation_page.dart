@@ -21,7 +21,7 @@ class NavigationPage extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40.0),
               child: Text(
-                'This page is reserved for future integration with map APIs (e.g., Google Maps) for driver/safari tracking.',
+                'Best Heat map you will ever see',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
@@ -32,7 +32,7 @@ class NavigationPage extends StatelessWidget {
                 // Placeholder action
               },
               icon: const Icon(Icons.add_road),
-              label: const Text('Start Dummy Navigation'),
+              label: const Text('Still Being developed'),
             ),
           ],
         ),

@@ -4,6 +4,39 @@ import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
 import 'package:rootrails/pages/general_user/general_user_home_page.dart';
 
+// --- Custom Colors for Theme Consistency ---
+const Color kPrimaryGreen = Color(0xFF4C7D4D); // Dark Green from Start Page
+const Color kCardColor = Colors.white;
+const Color kGradientStart = Color(0xFF7CB342); // Light Green for Button
+const Color kGradientEnd = Color(0xFF4CAF50); // Dark Green for Button
+
+// --- Custom Clipper for the Rounded Card Shape ---
+class TopRoundedClipper extends CustomClipper<Path> {
+  final double radius;
+
+  TopRoundedClipper(this.radius);
+
+  @override
+  Path getClip(Size size) {
+    final path = Path()
+      ..moveTo(0, radius)
+      // Curve from (0, radius) to (radius, 0)
+      ..arcToPoint(Offset(radius, 0), radius: Radius.circular(radius))
+      // Draw a line across the top
+      ..lineTo(size.width - radius, 0)
+      // Curve from (size.width - radius, 0) to (size.width, radius)
+      ..arcToPoint(Offset(size.width, radius), radius: Radius.circular(radius))
+      // Draw lines down and back to the start
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
 class GeneralUserRegistrationPage extends StatefulWidget {
   const GeneralUserRegistrationPage({super.key});
 
@@ -17,12 +50,26 @@ class _GeneralUserRegistrationPageState
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   Future<void> _register() async {
+    // Check for password mismatch before proceeding
+    if (_passwordController.text.trim() !=
+        _confirmPasswordController.text.trim()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Passwords do not match!')),
+        );
+      }
+      return;
+    }
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -36,17 +83,16 @@ class _GeneralUserRegistrationPageState
       );
 
       if (user != null) {
-        // 2. Save user role and details to Firestore
+        // Save user role and details to Firestore
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': _emailController.text.trim(),
           'role': 'general_user',
           'first_name': _firstNameController.text.trim(),
           'last_name': _lastNameController.text.trim(),
-          'full_name':
-              '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+          'full_name': _firstNameController.text
+              .trim(), // Using one field for display name
           'created_at': FieldValue.serverTimestamp(),
-          'profile_image_url':
-              'https://via.placeholder.com/150', // Default image
+          'profile_image_url': 'https://via.placeholder.com/150',
           'phone_number': '',
           'bio': '',
         });
@@ -84,114 +130,319 @@ class _GeneralUserRegistrationPageState
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Customer Registration')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(30.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Create Your Account',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 30),
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
+  }
 
-                // Name Fields
-                Row(
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Define the height of the green header section
+    const double headerHeight = 0.35;
+    // Define the overlap amount (how far the white card dips into the green)
+    const double overlapOffset = 0.05;
+
+    return Scaffold(
+      backgroundColor: kPrimaryGreen,
+      // The SingleChildScrollView now wraps the entire Stack content
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            // --- TOP BACKGROUND CONTAINER (Fills the required height) ---
+            // This container ensures the green color extends far enough to cover the header
+            Container(
+              height: screenHeight * headerHeight,
+              width: double.infinity,
+              color:
+                  kPrimaryGreen, // This is technically redundant due to Scaffold BG, but safer for the Stack
+            ),
+
+            // --- GREEN HEADER CONTENT (Safe Area for Back Button/Icon) ---
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _firstNameController,
-                        hintText: 'First Name',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                    // Custom Back Button
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back_ios,
+                          color: kCardColor,
+                        ),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: CustomTextField(
-                        controller: _lastNameController,
-                        hintText: 'Last Name',
-                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                    const SizedBox(height: 10),
+                    // Bear/Safari Icon Placeholder
+                    const Icon(Icons.pets, size: 80, color: Colors.black),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Welcome!',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: kCardColor,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+              ),
+            ),
 
-                // Email Field
-                CustomTextField(
-                  controller: _emailController,
-                  hintText: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) => v!.isEmpty || !v.contains('@')
-                      ? 'Enter a valid email'
-                      : null,
-                ),
-                const SizedBox(height: 20),
-
-                // Password Field
-                CustomTextField(
-                  controller: _passwordController,
-                  hintText: 'Password',
-                  obscureText: !_isPasswordVisible,
-                  validator: (v) => v!.length < 6
-                      ? 'Password must be at least 6 characters'
-                      : null,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
+            // --- MAIN REGISTRATION CARD (White Area) ---
+            Container(
+              // Position the white card just below the desired green header start point
+              margin: EdgeInsets.only(
+                top: screenHeight * (headerHeight - overlapOffset),
+              ),
+              child: ClipPath(
+                clipper: TopRoundedClipper(30), // Rounded top corners
+                child: Container(
+                  color: kCardColor,
+                  // Ensure the card fills the rest of the screen height MINIMALLY
+                  constraints: BoxConstraints(
+                    minHeight:
+                        screenHeight * (1.0 - (headerHeight - overlapOffset)),
                   ),
-                ),
-                const SizedBox(height: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                  width: double.infinity,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const SizedBox(height: 40),
 
-                // Register Button
-                _isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _register,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        // Title: Sign Up
+                        Text(
+                          'Sign Up',
+                          style: Theme.of(context).textTheme.headlineLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                        ),
+                        const SizedBox(height: 30),
+
+                        // Name Field
+                        const Text(
+                          'Name',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _firstNameController,
+                          hintText: 'John Doe',
+                          validator: (v) =>
+                              v!.isEmpty ? 'Name is required' : null,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Email Field
+                        const Text(
+                          'Email',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _emailController,
+                          hintText: 'example@gmail.com',
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) => v!.isEmpty || !v.contains('@')
+                              ? 'Enter a valid email'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Password Field
+                        const Text(
+                          'Password',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _passwordController,
+                          hintText: '********',
+                          obscureText: !_isPasswordVisible,
+                          validator: (v) => v!.length < 6
+                              ? 'Password must be at least 6 characters'
+                              : null,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: kPrimaryGreen,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
                           ),
                         ),
-                        child: const Text(
-                          'Register',
-                          style: TextStyle(fontSize: 18),
+                        const SizedBox(height: 20),
+
+                        // Confirm Password Field
+                        const Text(
+                          'Confirm Password',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        CustomTextField(
+                          controller: _confirmPasswordController,
+                          hintText: '********',
+                          obscureText: !_isConfirmPasswordVisible,
+                          validator: (v) => v!.isEmpty
+                              ? 'Confirm password is required'
+                              : null,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isConfirmPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: kPrimaryGreen,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isConfirmPasswordVisible =
+                                    !_isConfirmPasswordVisible;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 30),
 
-                const SizedBox(height: 20),
+                        // Register Button (Styled with Gradient and 'Next' Text)
+                        _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : Container(
+                                width: double.infinity,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  gradient: const LinearGradient(
+                                    colors: [kGradientStart, kGradientEnd],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: kGradientEnd.withOpacity(0.4),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: _register,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: const Center(
+                                      child: Text(
+                                        'Next',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
 
-                // Login Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an account?'),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Go back to login page
-                      },
-                      child: const Text('Sign In'),
+                        const SizedBox(height: 30),
+
+                        // OR Divider
+                        const Row(
+                          children: [
+                            Expanded(child: Divider(color: Colors.grey)),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.0),
+                              child: Text(
+                                'or',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                            Expanded(child: Divider(color: Colors.grey)),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Social Icons
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Google Icon
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: const Icon(
+                                Icons.g_mobiledata,
+                                size: 30,
+                                color: Colors.red,
+                              ),
+                            ),
+                            const SizedBox(width: 30),
+                            // Facebook Icon
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: const Icon(
+                                Icons.facebook,
+                                size: 30,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Login Link
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Already have an account?'),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Go back to login page
+                              },
+                              child: Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  color: kPrimaryGreen,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

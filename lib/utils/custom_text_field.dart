@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// Define the custom fill color used in the Sign Up design
+const Color kInputFillColor = Color(0xFFF0F0F0); // Light grey fill for inputs
+
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -22,6 +25,18 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
   });
 
+  // Define a constant radius for the highly rounded corners
+  static const double kTextFieldRadius = 50.0;
+
+  // Define a transparent border style to remove the visible outline
+  final InputBorder kNoInputBorder = const OutlineInputBorder(
+    borderRadius: BorderRadius.all(Radius.circular(kTextFieldRadius)),
+    borderSide: BorderSide(
+      color: Colors.transparent, // Making the border transparent
+      width: 0,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -33,27 +48,42 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
+        // The hint text color is slightly lighter for "example@gmail.com" look
+        hintStyle: const TextStyle(color: Colors.grey),
         suffixIcon: suffixIcon,
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 15,
-          horizontal: 20,
+          vertical: 18, // Slightly increased vertical padding for height
+          horizontal: 25,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+
+        // --- Custom Styling to Match Design ---
+
+        // Set all border states to the transparent, highly rounded style
+        border: kNoInputBorder,
+        enabledBorder: kNoInputBorder,
+        focusedBorder: kNoInputBorder,
+        errorBorder: OutlineInputBorder(
+          // Keep error border visible but rounded
+          borderRadius: const BorderRadius.all(
+            Radius.circular(kTextFieldRadius),
+          ),
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2,
+            color: Theme.of(context).colorScheme.error,
+            width: 1.5,
           ),
         ),
-        fillColor: enabled ? Theme.of(context).cardColor : Colors.grey.shade100,
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(
+            Radius.circular(kTextFieldRadius),
+          ),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.error,
+            width: 2.0,
+          ),
+        ),
+
+        // Set the fill color to the light grey
+        fillColor: enabled ? kInputFillColor : Colors.grey.shade100,
         filled: true,
       ),
     );
