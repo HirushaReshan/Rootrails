@@ -29,7 +29,6 @@ class DummyPaymentPage extends StatefulWidget {
 class _DummyPaymentPageState extends State<DummyPaymentPage> {
   bool _isProcessing = false;
 
-  // Dummy payment fields
   final TextEditingController _cardNumberController = TextEditingController(
     text: '1234 5678 9012 3456',
   );
@@ -55,29 +54,33 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
     });
 
     try {
-      // 1. Fetch the user's full name from Firestore
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .get();
-      final userFullName = userDoc.data()?['full_name'] ?? user.email;
 
-      // 2. Create the Booking object
+      final userFullName =
+          (userDoc.data()?['first_name'] ?? '') +
+          ' ' +
+          (userDoc.data()?['last_name'] ?? '');
+
       final newBooking = Booking(
-        id: '', // Firestore will assign this
+        id: '',
         userId: user.uid,
         driverId: widget.driver.uid,
+        parkId: widget.driver.parkId, // <-- Includes parkId
         driverName: widget.driver.businessName,
         parkName: widget.parkName,
         bookingDate: widget.bookingDate,
         bookingTime: widget.bookingTime,
         totalAmount: widget.driver.pricePerSafari,
         notes: widget.notes,
-        status: 'pending', // Driver needs to confirm
-        userFullName: userFullName,
+        status: 'pending',
+        userFullName: userFullName.trim().isEmpty
+            ? (user.email ?? 'Guest')
+            : userFullName.trim(),
       );
 
-      // 3. Save to Firestore via BookingService
       await BookingService().createBooking(newBooking);
 
       if (mounted) {
@@ -85,7 +88,6 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
           'Payment simulated. Booking sent for driver confirmation!',
           isError: false,
         );
-        // Navigate back to the Home page (My List will show the pending booking)
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const GeneralUserHomePage()),
           (Route<dynamic> route) => false,
@@ -130,6 +132,7 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
             _buildSummaryRow('Driver:', widget.driver.businessName),
             _buildSummaryRow(
               'Date:',
+              // 🔥 FIX: Corrected typo 'widget_bookingDate'
               '${widget.bookingDate.month}/${widget.bookingDate.day}/${widget.bookingDate.year}',
             ),
             _buildSummaryRow('Time:', widget.bookingTime),
@@ -146,7 +149,6 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
             ),
             const SizedBox(height: 15),
 
-            // Card Number
             TextField(
               controller: _cardNumberController,
               decoration: const InputDecoration(
@@ -157,7 +159,6 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
             ),
             const SizedBox(height: 15),
 
-            // Expiry and CVV
             Row(
               children: [
                 Expanded(

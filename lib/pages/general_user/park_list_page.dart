@@ -9,12 +9,10 @@ class ParkListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Find Your Adventure')),
       body: StreamBuilder<QuerySnapshot>(
-        // Fetching all documents from the 'parks' collection
-        stream: FirebaseFirestore.instance
-            .collection('parks')
-            .where('business_type', isEqualTo: 'park')
-            .snapshots(),
+        // 1. Fetch from the 'parks' collection
+        stream: FirebaseFirestore.instance.collection('parks').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -24,14 +22,11 @@ class ParkListPage extends StatelessWidget {
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
-              child: Text(
-                'No parks or safari services available yet.',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+              child: Text('No national parks are available at this time.'),
             );
           }
 
-          final List<Park> parks = snapshot.data!.docs
+          final parks = snapshot.data!.docs
               .map((doc) => Park.fromFirestore(doc))
               .toList();
 
@@ -50,13 +45,13 @@ class ParkListPage extends StatelessWidget {
 
 class ParkCard extends StatelessWidget {
   final Park park;
-
   const ParkCard({super.key, required this.park});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // 3. Navigate to the ParkDetailPage, passing the park object.
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ParkDetailPage(park: park)),
@@ -66,24 +61,22 @@ class ParkCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Park Image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(15),
-              ),
+            Container(
+              height: 200,
+              width: double.infinity,
               child: Image.network(
                 park.imageUrl,
-                height: 200,
-                width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   height: 200,
                   color: Colors.grey.shade300,
                   child: const Center(
-                    child: Icon(Icons.photo, size: 50, color: Colors.grey),
+                    child: Icon(Icons.park, size: 50, color: Colors.grey),
                   ),
                 ),
               ),
@@ -128,7 +121,7 @@ class ParkCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Tap to view available drivers and book your next safari adventure.',
+                    'Tap to view available drivers.',
                     style: TextStyle(color: Colors.grey),
                   ),
                 ],

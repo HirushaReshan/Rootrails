@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rootrails/models/park.dart'; // <-- IMPORT PARK MODEL
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
 import 'package:rootrails/pages/business_user/business_user_home_page.dart';
+import 'package:rootrails/models/business.dart'; // <-- IMPORT BUSINESS MODEL
 
 class BusinessUserRegistrationPage extends StatefulWidget {
   const BusinessUserRegistrationPage({super.key});
@@ -21,11 +23,50 @@ class _BusinessUserRegistrationPageState
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  // State for parks dropdown
+  List<Park> _parksList = [];
+  Park? _selectedPark;
+  bool _isParkLoading = true;
+
   bool _isLoading = false;
   bool _isPasswordVisible = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchParks();
+  }
+
+  Future<void> _fetchParks() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('parks') // <-- Reads from your manual 'parks' collection
+          .get();
+      _parksList = snapshot.docs.map((doc) => Park.fromFirestore(doc)).toList();
+      setState(() {
+        _isParkLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isParkLoading = false;
+      });
+      print("Error fetching parks: $e");
+      // Handle error, e.g., show a snackbar
+    }
+  }
+
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedPark == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a park.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -38,32 +79,38 @@ class _BusinessUserRegistrationPageState
       );
 
       if (user != null) {
-        // 2. Save business details to Firestore in the 'parks' collection for listing
-        await FirebaseFirestore.instance.collection('parks').doc(user.uid).set({
-          'uid': user.uid,
-          'email': _emailController.text.trim(),
-          'role': 'business_user',
-          'business_name': _businessNameController.text.trim(),
-          'business_description': _descriptionController.text.trim(),
-          'price_per_safari': double.tryParse(_priceController.text) ?? 0.0,
-          'safari_duration_hours': 3.0, // Default value
-          'location_info': 'Main Park Entrance', // Default value
-          'is_open': false, // Starts as closed
-          'business_type': 'park', // Default to 'park' type
-          'park_id': 'default_park_id', // Placeholder
-          'rating': 0.0,
-          'business_image_url':
+        // 1. Create the Business object using the model
+        final newBusinessProfile = Business(
+          uid: user.uid,
+          email: _emailController.text.trim(),
+          role: 'business_user',
+          businessName: _businessNameController.text.trim(),
+          businessDescription: _descriptionController.text.trim(),
+          pricePerSafari: double.tryParse(_priceController.text) ?? 0.0,
+          safariDurationHours: 3.0, // Default value
+          locationInfo: 'Main Park Entrance', // Default value
+          isOpen: false, // Starts as closed
+          businessType: 'park', // Default to 'park' type
+          parkId: _selectedPark!.id, // <-- USE SELECTED PARK ID
+          rating: 0.0,
+          businessImageUrl:
               'https://via.placeholder.com/300/FFA000/FFFFFF?text=Safari+Service',
-          'driver_image_url':
+          driverImageUrl:
               'https://via.placeholder.com/150/FF9800/FFFFFF?text=Driver',
-          'created_at': FieldValue.serverTimestamp(),
-        });
+        );
 
-        // 3. Save minimum user document for role checking in main.dart
+        // 2. Save business details to the correct 'drivers' collection
+        await FirebaseFirestore.instance
+            .collection('drivers') // <-- SAVES TO 'drivers'
+            .doc(user.uid)
+            .set(newBusinessProfile.toFirestore());
+
+        // 3. Save minimum user document for role checking
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': _emailController.text.trim(),
           'role': 'business_user',
-          'full_name': _businessNameController.text.trim(),
+          'first_name': _businessNameController.text.trim(),
+          'last_name': '',
         });
 
         if (mounted) {
@@ -74,7 +121,6 @@ class _BusinessUserRegistrationPageState
               ),
             ),
           );
-          // Navigate to Home Page
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => const BusinessUserHomePage(),
@@ -129,6 +175,34 @@ class _BusinessUserRegistrationPageState
                 ),
                 const SizedBox(height: 20),
 
+                // --- Park Dropdown ---
+                _isParkLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : DropdownButtonFormField<Park>(
+                        value: _selectedPark,
+                        hint: const Text('Select Your Park'),
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.park),
+                        ),
+                        items: _parksList.map((Park park) {
+                          return DropdownMenuItem<Park>(
+                            value: park,
+                            child: Text(park.name),
+                          );
+                        }).toList(),
+                        onChanged: (Park? newValue) {
+                          setState(() {
+                            _selectedPark = newValue;
+                          });
+                        },
+                        validator: (value) =>
+                            value == null ? 'Park is required' : null,
+                      ),
+                const SizedBox(height: 20),
+                // --- End Park Dropdown ---
+
                 // Email Field
                 CustomTextField(
                   controller: _emailController,
@@ -163,7 +237,7 @@ class _BusinessUserRegistrationPageState
                 ),
                 const SizedBox(height: 20),
 
-                // Price and Description
+                // Price
                 CustomTextField(
                   controller: _priceController,
                   hintText: 'Price per Safari (e.g., 150.00)',
@@ -174,6 +248,7 @@ class _BusinessUserRegistrationPageState
                 ),
                 const SizedBox(height: 20),
 
+                // Description
                 CustomTextField(
                   controller: _descriptionController,
                   hintText: 'Short Service Description',

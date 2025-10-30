@@ -25,8 +25,7 @@ class Park {
       throw Exception("Park data not available.");
     }
 
-    // This model assumes a separate 'parks_info' collection
-    // or that a 'parks' document has this structure.
+    // This model now correctly reads from the 'parks' collection
     return Park(
       id: doc.id,
       name: data['name'] ?? 'Unknown Park',

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rootrails/models/business.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
+import 'package:rootrails/models/park.dart';
 
 class BusinessProfilePage extends StatefulWidget {
   const BusinessProfilePage({super.key});
@@ -21,6 +22,11 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
+  // For the park dropdown
+  String? _selectedParkId;
+  List<Park> _parksList = [];
+  bool _isParkLoading = true;
+
   bool _isLoading = true;
   bool _isEditing = false;
 
@@ -28,14 +34,32 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
   void initState() {
     super.initState();
     _fetchBusinessProfile();
+    _fetchParks();
+  }
+
+  Future<void> _fetchParks() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('parks')
+          .get();
+      _parksList = snapshot.docs.map((doc) => Park.fromFirestore(doc)).toList();
+      setState(() {
+        _isParkLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isParkLoading = false;
+      });
+      print("Error fetching parks: $e");
+    }
   }
 
   Future<void> _fetchBusinessProfile() async {
     if (firebaseUser == null) return;
 
-    // Fetch from the 'parks' collection where the business listing resides
+    // Fetch from the 'drivers' collection
     final doc = await FirebaseFirestore.instance
-        .collection('parks')
+        .collection('drivers') // <-- FIX: Reads from 'drivers'
         .doc(firebaseUser!.uid)
         .get();
     if (doc.exists) {
@@ -46,6 +70,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
         _descriptionController.text = business.businessDescription;
         _priceController.text = business.pricePerSafari.toStringAsFixed(2);
         _locationController.text = business.locationInfo;
+        _selectedParkId = business.parkId;
         _isLoading = false;
       });
     } else {
@@ -58,23 +83,33 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate() || firebaseUser == null) return;
 
+    if (_selectedParkId == null || _selectedParkId!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a park.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       await FirebaseFirestore.instance
-          .collection('parks')
+          .collection('drivers') // <-- FIX: Writes to 'drivers'
           .doc(firebaseUser!.uid)
           .update({
             'business_name': _nameController.text.trim(),
             'business_description': _descriptionController.text.trim(),
             'price_per_safari': double.parse(_priceController.text.trim()),
             'location_info': _locationController.text.trim(),
+            'park_id': _selectedParkId,
             'updated_at': FieldValue.serverTimestamp(),
           });
 
-      // Re-fetch to update local model and UI
       await _fetchBusinessProfile();
 
       if (mounted) {
@@ -140,7 +175,6 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Business Image (Placeholder/Upload)
               Stack(
                 children: [
                   ClipRRect(
@@ -177,7 +211,6 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
               ),
               const Divider(height: 40),
 
-              // Form Fields (Editable in Edit Mode)
               CustomTextField(
                 controller: _nameController,
                 hintText: 'Business Name',
@@ -185,6 +218,35 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
                 enabled: _isEditing,
               ),
               const SizedBox(height: 15),
+
+              _isParkLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : DropdownButtonFormField<String>(
+                      value: _selectedParkId,
+                      hint: const Text('Select Your Park'),
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.park),
+                      ),
+                      items: _parksList.map((Park park) {
+                        return DropdownMenuItem<String>(
+                          value: park.id,
+                          child: Text(park.name),
+                        );
+                      }).toList(),
+                      onChanged: _isEditing
+                          ? (String? newValue) {
+                              setState(() {
+                                _selectedParkId = newValue;
+                              });
+                            }
+                          : null,
+                      validator: (value) =>
+                          value == null ? 'Park is required' : null,
+                    ),
+              const SizedBox(height: 15),
+
               CustomTextField(
                 controller: _locationController,
                 hintText: 'Primary Pickup Location',

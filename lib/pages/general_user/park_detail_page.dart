@@ -31,35 +31,15 @@ class ParkDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    park.name,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    'Available Safari Drivers',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.star, color: Colors.amber.shade700, size: 20),
-                      const SizedBox(width: 4),
-                      Text('${park.rating.toStringAsFixed(1)} Rating'),
-                      const SizedBox(width: 16),
-                      Icon(
-                        Icons.location_on,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      Text(park.location),
-                    ],
-                  ),
-                  const Divider(height: 30),
-                  Text(
-                    'Available Safari Drivers',
-                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 10),
 
                   // Driver List Section
-                  _buildDriverList(),
+                  _buildDriverList(context),
                 ],
               ),
             ),
@@ -69,15 +49,13 @@ class ParkDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDriverList() {
-    // Assuming the 'parks' collection contains documents which are driver listings,
-    // and we filter by drivers who are 'open' and associated with a park (in a real scenario, this filter would be more complex).
+  Widget _buildDriverList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
+      // FIX: Queries the 'drivers' collection
       stream: FirebaseFirestore.instance
-          .collection('parks')
-          .where('business_type', isEqualTo: 'park') // Only show drivers
-          .where('is_open', isEqualTo: true) // Only show active drivers
-          // .where('park_id', isEqualTo: park.id) // Filter by park ID (if implemented)
+          .collection('drivers')
+          .where('park_id', isEqualTo: park.id) // Filter by park
+          .where('is_open', isEqualTo: true) // Filter by online status
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -89,8 +67,15 @@ class ParkDetailPage extends StatelessWidget {
           );
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Text(
-            'No drivers are currently available for booking at this park.',
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text(
+                'No drivers are currently online for this park. Please check back later.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ),
           );
         }
 
@@ -127,6 +112,7 @@ class DriverCard extends StatelessWidget {
         leading: CircleAvatar(
           radius: 30,
           backgroundImage: NetworkImage(driver.driverImageUrl),
+          onBackgroundImageError: (e, s) => const Icon(Icons.person),
         ),
         title: Text(
           driver.businessName,
@@ -135,12 +121,29 @@ class DriverCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Price: \$${driver.pricePerSafari.toStringAsFixed(2)}'),
-            Text('Duration: ${driver.safariDurationHours} hours'),
+            Row(
+              children: [
+                Icon(Icons.star, color: Colors.amber.shade700, size: 16),
+                Text(' ${driver.rating.toStringAsFixed(1)}'),
+                const SizedBox(width: 10),
+                Icon(Icons.access_time, color: Colors.grey.shade600, size: 16),
+                Text(' ${driver.safariDurationHours} hrs'),
+              ],
+            ),
+            Text('Pickup: ${driver.locationInfo}'),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: Text(
+          '\$${driver.pricePerSafari.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+            fontSize: 16,
+          ),
+        ),
+        isThreeLine: true,
         onTap: () {
+          // Navigates to your existing driver_detail_page.dart
           Navigator.push(
             context,
             MaterialPageRoute(

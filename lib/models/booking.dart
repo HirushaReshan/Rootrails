@@ -4,6 +4,7 @@ class Booking {
   final String id;
   final String userId;
   final String driverId;
+  final String parkId; // <-- ADDED
   final String driverName;
   final String parkName;
   final DateTime bookingDate;
@@ -17,6 +18,7 @@ class Booking {
     required this.id,
     required this.userId,
     required this.driverId,
+    required this.parkId, // <-- ADDED
     required this.driverName,
     required this.parkName,
     required this.bookingDate,
@@ -35,6 +37,7 @@ class Booking {
       id: doc.id,
       userId: data['user_id'] ?? '',
       driverId: data['driver_id'] ?? '',
+      parkId: data['park_id'] ?? '', // <-- ADDED
       driverName: data['driver_name'] ?? 'N/A',
       parkName: data['park_name'] ?? 'N/A',
       bookingDate: (data['booking_date'] as Timestamp).toDate(),
@@ -50,6 +53,7 @@ class Booking {
     return {
       'user_id': userId,
       'driver_id': driverId,
+      'park_id': parkId, // <-- ADDED
       'driver_name': driverName,
       'park_name': parkName,
       'booking_date': Timestamp.fromDate(bookingDate),

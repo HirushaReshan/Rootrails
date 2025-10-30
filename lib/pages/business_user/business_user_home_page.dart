@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rootrails/models/business.dart';
 import 'package:rootrails/widgets/business_drawer.dart';
+import 'dart:async'; // Required for StreamSubscription
 
 // Import all pages used in the bottom navigation
 import 'package:rootrails/pages/business_user/business_orders_page.dart';
@@ -20,6 +21,7 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
   int _selectedIndex = 0;
   Business? _businessProfile;
   bool _isLoading = true;
+  StreamSubscription<DocumentSnapshot>? _profileSubscription;
 
   // Pages are defined here
   final List<Widget> _pages = [
@@ -31,63 +33,77 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchBusinessProfile();
+    _setupProfileStream();
   }
 
-  Future<void> _fetchBusinessProfile() async {
+  @override
+  void dispose() {
+    // IMPORTANT: Cancel the stream subscription to avoid memory leaks
+    _profileSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _setupProfileStream() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       setState(() => _isLoading = false);
       return;
     }
 
-    try {
-      // Businesses are stored in the 'parks' collection for listings
-      final doc = await FirebaseFirestore.instance
-          .collection('parks')
-          .doc(user.uid)
-          .get();
-      if (doc.exists) {
-        setState(() {
-          _businessProfile = Business.fromFirestore(doc);
-          _isLoading = false;
-        });
-      } else {
-        // Handle case where registration is incomplete or data is missing
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      debugPrint("Error fetching business profile: $e");
-      setState(() => _isLoading = false);
-    }
+    _profileSubscription?.cancel();
+
+    // Listen to the 'drivers' collection for this user's profile
+    _profileSubscription = FirebaseFirestore.instance
+        .collection('drivers') // <-- FIX: Reads from 'drivers'
+        .doc(user.uid)
+        .snapshots()
+        .listen(
+          (doc) {
+            if (doc.exists) {
+              setState(() {
+                _businessProfile = Business.fromFirestore(doc);
+                _isLoading = false;
+              });
+            } else {
+              setState(() => _isLoading = false);
+            }
+          },
+          onError: (error) {
+            debugPrint("Error fetching business profile stream: $error");
+            setState(() => _isLoading = false);
+          },
+        );
   }
 
   Future<void> _toggleServiceStatus(bool newValue) async {
+    // Safety check
     if (_businessProfile == null) return;
 
     try {
       await FirebaseFirestore.instance
-          .collection('parks')
+          .collection('drivers') // <-- FIX: Writes to 'drivers'
           .doc(_businessProfile!.uid)
           .update({
             'is_open': newValue,
             'updated_at': FieldValue.serverTimestamp(),
           });
-      // Locally update the state
-      setState(() {
-        _businessProfile = _businessProfile?.copyWith(isOpen: newValue);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            newValue ? 'Service is now ONLINE.' : 'Service is now OFFLINE.',
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              newValue ? 'Service is now ONLINE.' : 'Service is now OFFLINE.',
+            ),
+            backgroundColor: newValue ? Colors.green : Colors.red,
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to update status: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update status: $e')));
+      }
     }
   }
 
@@ -103,7 +119,6 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // Provide defaults if profile fetch failed
     final String businessName =
         _businessProfile?.businessName ?? 'Safari Service';
     final String userEmail = _businessProfile?.email ?? 'N/A';
@@ -120,20 +135,22 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
                 isOpen ? 'ONLINE' : 'OFFLINE',
                 style: TextStyle(
                   color: isOpen ? Colors.greenAccent : Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               Switch(
                 value: isOpen,
+                // FIX: Pass the function directly to make it clickable
                 onChanged: _toggleServiceStatus,
-                activeColor: Colors.greenAccent,
-                inactiveThumbColor: Colors.redAccent,
+                activeColor: Colors.green,
+                inactiveThumbColor: Colors.red,
+                inactiveTrackColor: Colors.grey.shade400,
               ),
               const SizedBox(width: 8),
             ],
           ),
         ],
       ),
-      // Use the BusinessDrawer
       drawer: BusinessDrawer(businessName: businessName, userEmail: userEmail),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(

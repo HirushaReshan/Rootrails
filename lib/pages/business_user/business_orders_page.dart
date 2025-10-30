@@ -14,7 +14,6 @@ class BusinessOrdersPage extends StatelessWidget {
       return const Center(child: Text('Please log in to view your orders.'));
     }
 
-    // Tab controller for managing different order statuses
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -30,9 +29,10 @@ class BusinessOrdersPage extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            _buildOrderList(user.uid, 'pending'),
-            _buildOrderList(user.uid, 'confirmed'),
-            _buildOrderList(user.uid, 'completed', isHistory: true),
+            // Pass the correct status LIST to the builder function
+            _buildOrderList(user.uid, ['pending']),
+            _buildOrderList(user.uid, ['confirmed']),
+            _buildOrderList(user.uid, ['completed', 'canceled']),
           ],
         ),
       ),
@@ -41,29 +41,33 @@ class BusinessOrdersPage extends StatelessWidget {
 
   Widget _buildOrderList(
     String driverId,
-    String status, {
-    bool isHistory = false,
-  }) {
-    // History includes completed and canceled bookings
-    final List<String> statuses = isHistory
-        ? ['completed', 'canceled']
-        : [status];
+    List<String> statuses, // <-- Changed to accept a list
+  ) {
+    final bool isHistory = statuses.length > 1;
 
     return StreamBuilder<List<Booking>>(
-      stream: BookingService().getDriverOrders(driverId).map((bookings) {
-        return bookings.where((b) => statuses.contains(b.status)).toList();
-      }),
+      // FIX: Call the new function that filters in Firestore
+      stream: BookingService().getDriverOrdersByStatus(driverId, statuses),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Error: ${snapshot.error}\n\n(Have you created the Firestore index? Run the app and click the link in your console.)',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          final String statusText = isHistory ? 'history' : statuses.first;
           return Center(
             child: Text(
-              'No ${status.toUpperCase()} orders found.',
+              'No $statusText orders found.',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
           );
@@ -137,11 +141,14 @@ class OrderCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Client: ${booking.userFullName}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                Flexible(
+                  child: Text(
+                    'Client: ${booking.userFullName}',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -202,7 +209,7 @@ class OrderCard extends StatelessWidget {
                 ],
               ),
 
-            if (booking.status == 'confirmed')
+            if (!isHistory && booking.status == 'confirmed')
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton.icon(
@@ -228,7 +235,7 @@ class OrderCard extends StatelessWidget {
           Icon(icon, size: 18, color: Colors.grey.shade600),
           const SizedBox(width: 8),
           Text('$title ', style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value),
+          Expanded(child: Text(value)),
         ],
       ),
     );
