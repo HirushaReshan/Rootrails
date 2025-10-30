@@ -70,7 +70,7 @@ class _StartPageState extends State<StartPage>
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'SafariGo',
+                    'RooTrails',
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
