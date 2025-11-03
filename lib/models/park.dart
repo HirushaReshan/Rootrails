@@ -25,15 +25,15 @@ class Park {
       throw Exception("Park data not available.");
     }
 
-    // This model now correctly reads from the 'parks' collection
+    // read from park collection
     return Park(
       id: doc.id,
       name: data['name'] ?? 'Unknown Park',
       imageUrl: data['image_url'] ?? 'https://via.placeholder.com/300',
       openTime: data['open_time'] ?? '9:00 AM - 5:00 PM',
       rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
-      isOpenNow: data['is_open_now'] ?? true, // Simplified status
-      location: data['location_query'] ?? 'Africa', // Query for Google Maps
+      isOpenNow: data['is_open_now'] ?? true,
+      location: data['location_query'] ?? 'Africa',
     );
   }
 }

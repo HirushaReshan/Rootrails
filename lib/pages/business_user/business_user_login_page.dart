@@ -4,14 +4,13 @@ import 'package:rootrails/utils/custom_text_field.dart';
 import 'package:rootrails/pages/business_user/business_user_registration_page.dart';
 import 'package:rootrails/pages/business_user/business_user_home_page.dart';
 
-// --- Custom Colors for Theme Consistency ---
-const Color kPrimaryGreen = Color(0xFF4C7D4D); // Dark Green
+const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kCardColor = Colors.white;
-const Color kGradientStart = Color(0xFF7CB342); // Light Green for Button
-const Color kGradientEnd = Color(0xFF4CAF50); // Dark Green for Button
-const Color kBusinessIconColor = Colors.deepOrange; // Accent for Business Page
+const Color kGradientStart = Color(0xFF7CB342);
+const Color kGradientEnd = Color(0xFF4CAF50); 
+const Color kBusinessIconColor = Colors.deepOrange; 
 
-// --- Custom Clipper for the Rounded Card Shape ---
+
 class TopRoundedClipper extends CustomClipper<Path> {
   final double radius;
 
@@ -62,7 +61,7 @@ class _BusinessUserLoginPageState extends State<BusinessUserLoginPage> {
       );
 
       if (mounted) {
-        // Navigate to Business User Home Page (Dashboard) and clear navigation stack
+        // Navigate to Business User Home Page
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const BusinessUserHomePage()),
           (Route<dynamic> route) => false,
@@ -105,14 +104,14 @@ class _BusinessUserLoginPageState extends State<BusinessUserLoginPage> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            // --- TOP BACKGROUND CONTAINER ---
+            //TOP BACKGROUND CONTAINER
             Container(
               height: screenHeight * headerHeight,
               width: double.infinity,
               color: kPrimaryGreen,
             ),
 
-            // --- GREEN HEADER CONTENT ---
+            //GREEN HEADER CONTENT
             Positioned(
               top: 0,
               left: 0,
@@ -121,11 +120,11 @@ class _BusinessUserLoginPageState extends State<BusinessUserLoginPage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    // Icon placeholder
+                    
                     const Icon(
                       Icons.directions_bus,
                       size: 80,
-                      color: kBusinessIconColor, // Business-specific icon color
+                      color: kBusinessIconColor,
                     ),
                     const SizedBox(height: 10),
                     const Text(
@@ -141,7 +140,7 @@ class _BusinessUserLoginPageState extends State<BusinessUserLoginPage> {
               ),
             ),
 
-            // --- MAIN LOGIN CARD (White Area) ---
+            //MAIN LOGIN CARD
             Container(
               margin: EdgeInsets.only(
                 top: screenHeight * (headerHeight - overlapOffset),
@@ -217,7 +216,7 @@ class _BusinessUserLoginPageState extends State<BusinessUserLoginPage> {
                         ),
                         const SizedBox(height: 30),
 
-                        // Login Button (Styled with Gradient)
+                        // Login Button
                         _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : Container(

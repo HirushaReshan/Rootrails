@@ -48,22 +48,18 @@ class CustomTextField extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
-        // The hint text color is slightly lighter for "example@gmail.com" look
+
         hintStyle: const TextStyle(color: Colors.grey),
         suffixIcon: suffixIcon,
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 18, // Slightly increased vertical padding for height
+          vertical: 18,
           horizontal: 25,
         ),
 
-        // --- Custom Styling to Match Design ---
-
-        // Set all border states to the transparent, highly rounded style
         border: kNoInputBorder,
         enabledBorder: kNoInputBorder,
         focusedBorder: kNoInputBorder,
         errorBorder: OutlineInputBorder(
-          // Keep error border visible but rounded
           borderRadius: const BorderRadius.all(
             Radius.circular(kTextFieldRadius),
           ),
@@ -82,7 +78,6 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
 
-        // Set the fill color to the light grey
         fillColor: enabled ? kInputFillColor : Colors.grey.shade100,
         filled: true,
       ),

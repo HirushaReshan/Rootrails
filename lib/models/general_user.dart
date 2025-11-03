@@ -7,6 +7,7 @@ class GeneralUser {
   final String lastName;
   final String email;
   final String role;
+
   // Fields for profile page
   final String profileImageUrl;
   final String phoneNumber;
@@ -24,9 +25,9 @@ class GeneralUser {
     this.bio = '',
   });
 
-  // 👇 ADD THIS GETTER TO RESOLVE THE 'fullName' ERROR
+  //Getter for Fullname
   String get fullName {
-    // Combines first name and last name, trimming any extra whitespace if one is empty
+    // Combines first name and last name trim unnecessary parts
     return '$firstName $lastName'.trim();
   }
 

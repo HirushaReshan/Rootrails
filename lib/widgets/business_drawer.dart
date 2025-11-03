@@ -7,7 +7,6 @@ import 'package:rootrails/pages/common/settings_page.dart';
 import 'package:rootrails/pages/common/contact_us_page.dart';
 import 'package:rootrails/pages/business_user/business_orders_page.dart';
 
-// Define the core colors from your designs
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kLightGreenBackground = Color(0xFFE6F4E6);
 
@@ -43,7 +42,6 @@ class BusinessDrawer extends StatelessWidget {
     final themeService = Provider.of<ThemeService>(context);
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Menu items based on your original functional code:
     final List<Map<String, dynamic>> menuItems = [
       {
         'icon': Icons.contact_support,
@@ -59,10 +57,10 @@ class BusinessDrawer extends StatelessWidget {
 
     return Drawer(
       backgroundColor: Colors.white,
-      width: MediaQuery.of(context).size.width * 0.75, // Adjust drawer width
+      width: MediaQuery.of(context).size.width * 0.75,
       child: Column(
         children: [
-          // 1. TOP SECTION (Close Button and Logo)
+          // 1. TOP SECTION
           Container(
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top + 5,
@@ -90,7 +88,7 @@ class BusinessDrawer extends StatelessWidget {
             ),
           ),
 
-          // Branded App Title (RooTrails logo spot)
+          // Branded App Title
           const Padding(
             padding: EdgeInsets.only(left: 20.0, bottom: 5.0),
             child: Row(
@@ -109,12 +107,12 @@ class BusinessDrawer extends StatelessWidget {
 
           const Divider(height: 1, thickness: 0.5, indent: 20, endIndent: 20),
 
-          // 2. MIDDLE SECTION (Scrollable Menu Items and Theme Switch)
+          // 2. MIDDLE SECTION
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // Business Profile Info (Replacing UserAccountsDrawerHeader area)
+                // Business Profile Info
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -177,7 +175,7 @@ class BusinessDrawer extends StatelessWidget {
                   endIndent: 20,
                 ),
 
-                // Theme Switcher Logic (Retained Dark Mode only)
+                // Theme Switcher Logic
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -203,7 +201,6 @@ class BusinessDrawer extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Removed Animal Theme as it wasn't explicitly present in your original code
                     ],
                   ),
                 ),
@@ -211,7 +208,7 @@ class BusinessDrawer extends StatelessWidget {
             ),
           ),
 
-          // 3. BOTTOM SECTION (Logout and Green Background)
+          // 3. BOTTOM SECTION
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(

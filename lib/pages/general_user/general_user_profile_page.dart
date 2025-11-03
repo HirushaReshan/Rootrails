@@ -60,7 +60,6 @@ class _GeneralUserProfilePageState extends State<GeneralUserProfilePage> {
       _isLoading = true;
     });
 
-    // Simple split for first/last name update (needs robustness for real app)
     final List<String> names = _nameController.text.trim().split(' ');
     final String firstName = names.isNotEmpty ? names.first : '';
     final String lastName = names.length > 1 ? names.sublist(1).join(' ') : '';

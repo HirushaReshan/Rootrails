@@ -7,7 +7,6 @@ class ContactUsPage extends StatelessWidget {
   void _launchEmail() async {
     const emailUrl =
         'mailto:support@safari-booker.com?subject=App%20Support%20Request';
-    // Use canLaunchUrlString/launchUrlString for web/phone
     try {
       if (await canLaunchUrlString(emailUrl)) {
         await launchUrlString(emailUrl);
@@ -58,7 +57,7 @@ class ContactUsPage extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.email, color: Colors.redAccent),
                       title: const Text('Email Support'),
-                      subtitle: const Text('support@safari-booker.com'),
+                      subtitle: const Text('support@rootrails.com'),
                       trailing: const Icon(Icons.send),
                       onTap: _launchEmail,
                     ),
@@ -66,7 +65,7 @@ class ContactUsPage extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.phone, color: Colors.green),
                       title: const Text('Call Us'),
-                      subtitle: const Text('+254 700 000 000'),
+                      subtitle: const Text('+94 765 918 240'),
                       trailing: const Icon(Icons.call),
                       onTap: _launchPhone,
                     ),

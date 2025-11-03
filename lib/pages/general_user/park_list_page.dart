@@ -4,8 +4,7 @@ import 'package:rootrails/models/park.dart';
 import 'package:rootrails/pages/general_user/park_detail_page.dart';
 import 'package:rootrails/utils/image_carousel.dart';
 
-// --- Global Constants ---
-const Color kPrimaryGreen = Color(0xFF4C7D4D); // Define color
+const Color kPrimaryGreen = Color(0xFF4C7D4D);
 
 class ParkListPage extends StatelessWidget {
   const ParkListPage({super.key});
@@ -20,7 +19,7 @@ class ParkListPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. CAROUSEL STREAM BUILDER (TOP) ---
+            //CAROUSEL STREAM BUILDER
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection(
@@ -57,7 +56,7 @@ class ParkListPage extends StatelessWidget {
               },
             ),
 
-            // --- PARK LIST HEADER ---
+            //PARK LIST HEADER
             Padding(
               padding: const EdgeInsets.only(
                 left: 20.0,
@@ -74,7 +73,7 @@ class ParkListPage extends StatelessWidget {
               ),
             ),
 
-            // --- 2. PARK LIST STREAM BUILDER ---
+            //PARK LIST STREAM BUILDER
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('parks')
@@ -126,7 +125,7 @@ class ParkListPage extends StatelessWidget {
   }
 }
 
-// --- ParkCard Widget (Remains the same, but using kPrimaryGreen for consistency) ---
+//ParkCard Widget
 class ParkCard extends StatelessWidget {
   final Park park;
   const ParkCard({super.key, required this.park});

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:rootrails/pages/general_user/general_user_login_page.dart';
 import 'package:rootrails/pages/business_user/business_user_login_page.dart';
 
-// Define a consistent color scheme, like the green used previously
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
-const Color kAccentColor = Color(0xFF8BC34A); // A lighter green for accents
+const Color kAccentColor = Color(0xFF8BC34A);
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
@@ -16,10 +15,10 @@ class RoleSelectionPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            // --- Branded Header Section (Mimicking a login banner) ---
+            //Branded Header Section (Mimicking a login banner)
             _buildBrandedHeader(context),
 
-            // --- Role Selection Content ---
+            // Role Selection Content
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 30.0,
@@ -116,13 +115,13 @@ class RoleSelectionPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.terrain, // Use a relevant icon or your app logo here
+                Icons.terrain,//logo
                 size: 60,
                 color: Colors.white,
               ),
               SizedBox(height: 8),
               Text(
-                'ROOT RAILS', // Your app name/brand name
+                'ROOTRAILS', //AppName
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -144,7 +143,7 @@ class RoleSelectionPage extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
-    required Color color, // Added color for differentiation
+    required Color color,
   }) {
     return Card(
       elevation: 8, // Higher elevation for a floating, form-like effect
@@ -155,7 +154,6 @@ class RoleSelectionPage extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            // Optional: Light background color to highlight the card
             color: color.withOpacity(0.05),
           ),
           padding: const EdgeInsets.all(20.0),

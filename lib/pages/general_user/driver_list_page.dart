@@ -60,7 +60,7 @@ class DriverListPage extends StatelessWidget {
 
 class DriverCard extends StatelessWidget {
   final Driver driver;
-  final String parkName; // We need to pass parkName to the detail page
+  final String parkName;
   const DriverCard({super.key, required this.driver, required this.parkName});
 
   @override
@@ -70,7 +70,7 @@ class DriverCard extends StatelessWidget {
       elevation: 3,
       child: ListTile(
         onTap: () {
-          // Navigate to the DriverDetailPage (which you already have)
+          // Navigate to the DriverDetailPage
           Navigator.push(
             context,
             MaterialPageRoute(

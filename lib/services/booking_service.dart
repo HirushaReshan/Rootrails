@@ -28,7 +28,7 @@ class BookingService {
         });
   }
 
-  // 3. Stream driver's orders (FIXED for BusinessOrdersPage)
+  // 3. Stream driver's orders
   Stream<List<Booking>> getDriverOrdersByStatus(
     String driverId,
     List<String> statuses,
@@ -44,7 +44,7 @@ class BookingService {
     });
   }
 
-  // 4. Cancel a booking (update status to 'canceled')
+  // 4. Cancel a booking
   Future<void> cancelBooking(String bookingId) async {
     try {
       await _bookingsCollection.doc(bookingId).update({
@@ -56,7 +56,7 @@ class BookingService {
     }
   }
 
-  // 5. Update booking status (used by driver)
+  // 5. Update booking status
   Future<void> updateBookingStatus(String bookingId, String status) async {
     try {
       if (!['pending', 'confirmed', 'canceled', 'completed'].contains(status)) {

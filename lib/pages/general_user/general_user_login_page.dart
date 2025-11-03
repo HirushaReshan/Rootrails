@@ -4,13 +4,11 @@ import 'package:rootrails/utils/custom_text_field.dart';
 import 'package:rootrails/pages/general_user/general_user_registration_page.dart';
 import 'package:rootrails/pages/general_user/general_user_home_page.dart';
 
-// --- Custom Colors for Theme Consistency ---
-const Color kPrimaryGreen = Color(0xFF4C7D4D); // Dark Green
+const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kCardColor = Colors.white;
-const Color kGradientStart = Color(0xFF7CB342); // Light Green for Button
-const Color kGradientEnd = Color(0xFF4CAF50); // Dark Green for Button
+const Color kGradientStart = Color(0xFF7CB342);
+const Color kGradientEnd = Color(0xFF4CAF50);
 
-// --- Custom Clipper for the Rounded Card Shape ---
 class TopRoundedClipper extends CustomClipper<Path> {
   final double radius;
 
@@ -105,14 +103,12 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            // --- TOP BACKGROUND CONTAINER ---
             Container(
               height: screenHeight * headerHeight,
               width: double.infinity,
               color: kPrimaryGreen,
             ),
 
-            // --- GREEN HEADER CONTENT ---
             Positioned(
               top: 0,
               left: 0,
@@ -121,12 +117,7 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    // Icon placeholder
-                    const Icon(
-                      Icons.person,
-                      size: 80,
-                      color: Colors.black, // Changed to black for contrast
-                    ),
+                    const Icon(Icons.person, size: 80, color: Colors.black),
                     const SizedBox(height: 10),
                     const Text(
                       'Welcome Back!',
@@ -141,7 +132,6 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
               ),
             ),
 
-            // --- MAIN LOGIN CARD (White Area) ---
             Container(
               margin: EdgeInsets.only(
                 top: screenHeight * (headerHeight - overlapOffset),
@@ -217,7 +207,7 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
                         ),
                         const SizedBox(height: 30),
 
-                        // Login Button (Styled with Gradient)
+                        // Login Button
                         _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : Container(
@@ -259,7 +249,7 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
 
                         const SizedBox(height: 20),
 
-                        // OR Divider (from registration page style)
+                        // OR Divider
                         const Row(
                           children: [
                             Expanded(child: Divider(color: Colors.grey)),

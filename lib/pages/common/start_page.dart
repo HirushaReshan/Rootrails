@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rootrails/pages/common/role_selection_page.dart';
 
-// --- Global Constants (Moved to top-level for better access) ---
+//Global Constants
 // Define custom colors for easy changes later
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kSecondaryGreen = Color(0xFF7A9E7A);
@@ -11,25 +11,20 @@ const Color kTextColor = Colors.white;
 const String kLeopardImagePath = 'assets/leopard.png';
 const IconData kNavigationIcon = Icons.directions_car_filled;
 
-// ====================================================================
-// --- CORRECTED: CustomPainter Class (Must be Top-Level) ---
-// ====================================================================
 class CurvedBackgroundPainter extends CustomPainter {
   final Color color;
 
-  // Constructor now correctly defines the 'color' field
   CurvedBackgroundPainter(this.color);
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Create a path that covers the desired area with a curved top-left corner
     final path = Path()
       ..lineTo(size.width, 0)
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..arcToPoint(
-        const Offset(0, 100), // Starting point of the arc (top-left corner)
-        radius: const Radius.circular(50), // Radius of the curve
+        const Offset(0, 100),
+        radius: const Radius.circular(50),
         clockwise: false,
       )
       ..close();
@@ -41,7 +36,6 @@ class CurvedBackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-// ====================================================================
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -93,7 +87,7 @@ class _StartPageState extends State<StartPage>
       backgroundColor: kPrimaryGreen,
       body: Stack(
         children: [
-          // --- Background Leopard Image ---
+          //Background Leopard Image
           Positioned(
             right: -100,
             bottom: 0,
@@ -108,7 +102,7 @@ class _StartPageState extends State<StartPage>
             ),
           ),
 
-          // --- Curved Container Shape (Green Overlay) ---
+          //Curved Container Shape
           Positioned.fill(
             child: CustomPaint(
               // Now it correctly calls the top-level class
@@ -118,7 +112,7 @@ class _StartPageState extends State<StartPage>
             ),
           ),
 
-          // --- Foreground UI Elements (Text and Button) ---
+          //Foreground UI Elements
           SlideTransition(
             position: _slideAnimation,
             child: FadeTransition(
@@ -132,7 +126,6 @@ class _StartPageState extends State<StartPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 'Welcome to' text
                     const Text(
                       'Welcome\nto',
                       style: TextStyle(
@@ -165,7 +158,7 @@ class _StartPageState extends State<StartPage>
                       ],
                     ),
 
-                    const Spacer(), // Pushes the button to the bottom
+                    const Spacer(),
                     // 'Get Started' Button
                     Align(
                       alignment: Alignment.centerLeft,

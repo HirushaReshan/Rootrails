@@ -6,9 +6,7 @@ import 'package:rootrails/pages/common/role_selection_page.dart';
 import 'package:rootrails/pages/general_user/my_list_page.dart';
 import 'package:rootrails/pages/common/settings_page.dart';
 import 'package:rootrails/pages/common/contact_us_page.dart';
-// Note: Keeping MyListPage for "My Bookings" as per your previous context.
 
-// Define the core green color from your designs
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kLightGreenBackground = Color(0xFFE6F4E6);
 
@@ -22,7 +20,6 @@ class UserDrawer extends StatelessWidget {
     required this.userEmail,
   });
 
-  // Helper function to build consistent menu tiles
   Widget _buildDrawerTile(
     BuildContext context,
     IconData icon,
@@ -44,7 +41,6 @@ class UserDrawer extends StatelessWidget {
     final themeService = Provider.of<ThemeService>(context);
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Menu items based on your initial functional code:
     final List<Map<String, dynamic>> menuItems = [
       {
         'icon': Icons.phone,
@@ -244,7 +240,7 @@ class UserDrawer extends StatelessWidget {
             ),
           ),
 
-          // 3. BOTTOM SECTION (Logout and Green Background)
+          // 3. BOTTOM SECTION
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(

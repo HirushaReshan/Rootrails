@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// NOTE: Make sure these models exist in your project structure!
-// import 'package:rootrails/models/park.dart';
-// import 'package:rootrails/models/business.dart';
 import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
 import 'package:rootrails/pages/business_user/business_user_home_page.dart';
 
-// --- Custom Colors for Theme Consistency ---
-const Color kPrimaryGreen = Color(0xFF4C7D4D); // Dark Green
+const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kCardColor = Colors.white;
-const Color kGradientStart = Color(0xFF7CB342); // Light Green for Button
-const Color kGradientEnd = Color(0xFF4CAF50); // Dark Green for Button
-const Color kBusinessIconColor = Colors.deepOrange; // Accent for Business Page
+const Color kGradientStart = Color(0xFF7CB342);
+const Color kGradientEnd = Color(0xFF4CAF50);
+const Color kBusinessIconColor = Colors.deepOrange;
 
-// --- Custom Clipper for the Rounded Card Shape ---
+//Custom Clipper Rounded Card Shape
 class TopRoundedClipper extends CustomClipper<Path> {
   final double radius;
 
@@ -37,14 +33,11 @@ class TopRoundedClipper extends CustomClipper<Path> {
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
-// Placeholder classes since your models aren't provided. You MUST replace these
-// with your actual model files to run without error.
 class Park {
   final String id;
   final String name;
   Park({required this.id, required this.name});
   factory Park.fromFirestore(DocumentSnapshot doc) {
-    // Implement your actual deserialization logic here
     return Park(id: doc.id, name: doc['name'] as String? ?? 'Unknown Park');
   }
 }
@@ -101,7 +94,6 @@ class Business {
     };
   }
 }
-// End of Placeholder classes
 
 class BusinessUserRegistrationPage extends StatefulWidget {
   const BusinessUserRegistrationPage({super.key});
@@ -126,7 +118,7 @@ class _BusinessUserRegistrationPageState
     Park(id: 'p2', name: 'Wilpattu National Park'),
   ];
   Park? _selectedPark;
-  bool _isParkLoading = false; // Set to false since we use mock data above
+  bool _isParkLoading = false; //set to mockdata
 
   bool _isLoading = false;
   bool _isPasswordVisible = false;
@@ -138,8 +130,6 @@ class _BusinessUserRegistrationPageState
   }
 
   Future<void> _fetchParks() async {
-    // Since we're providing the full file, I will wrap the Firestore call in a
-    // try/catch but keep the mock list above to ensure the UI builds without errors.
     setState(() {
       _isParkLoading = true;
     });
@@ -147,10 +137,9 @@ class _BusinessUserRegistrationPageState
       final snapshot = await FirebaseFirestore.instance
           .collection('parks')
           .get();
-      // Ensure the list is populated from Firestore if successful
+
       _parksList = snapshot.docs.map((doc) => Park.fromFirestore(doc)).toList();
     } catch (e) {
-      // In a real app, log error or show snackbar
       print("Error fetching parks: $e");
     } finally {
       setState(() {
@@ -267,7 +256,7 @@ class _BusinessUserRegistrationPageState
               color: kPrimaryGreen,
             ),
 
-            // --- GREEN HEADER CONTENT ---
+            //GREEN HEADER CONTENT
             Positioned(
               top: 0,
               left: 0,
@@ -307,7 +296,7 @@ class _BusinessUserRegistrationPageState
               ),
             ),
 
-            // --- MAIN REGISTRATION CARD (White Area) ---
+            //MAIN REGISTRATION CARD (White Area)
             Container(
               margin: EdgeInsets.only(
                 top: screenHeight * (headerHeight - overlapOffset),
@@ -398,14 +387,13 @@ class _BusinessUserRegistrationPageState
                         ),
                         const SizedBox(height: 20),
 
-                        // --- Park Dropdown (Wrapped for consistent spacing) ---
+                        //Park Dropdown
                         const Text(
                           'Select Park',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          // The height and padding of this container help simulate the CustomTextField height
                           padding: const EdgeInsets.symmetric(vertical: 0),
                           decoration: BoxDecoration(
                             color:
@@ -459,7 +447,6 @@ class _BusinessUserRegistrationPageState
                                 ),
                         ),
                         const SizedBox(height: 20),
-                        // --- End Park Dropdown ---
 
                         // Price
                         const Text(
@@ -493,7 +480,7 @@ class _BusinessUserRegistrationPageState
                         ),
                         const SizedBox(height: 30),
 
-                        // Register Button (Styled with Gradient)
+                        // Register Button
                         _isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : Container(

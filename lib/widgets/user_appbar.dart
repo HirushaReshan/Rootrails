@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class UserAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String userName;
   final String title;

@@ -5,13 +5,11 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:rootrails/models/general_user.dart';
 import 'package:rootrails/widgets/user_drawer.dart';
 
-// Import all pages used in the bottom navigation
 import 'package:rootrails/pages/general_user/park_list_page.dart';
 import 'package:rootrails/pages/general_user/my_list_page.dart';
 import 'package:rootrails/pages/common/navigation_page.dart';
 import 'package:rootrails/pages/general_user/general_user_profile_page.dart';
 
-// Define the custom colors used for consistency
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kOrangeAccent = Color(0xFFFFA500);
 
@@ -104,12 +102,7 @@ class _GeneralUserHomePageState extends State<GeneralUserHomePage> {
         semanticLabel: 'User Menu',
         child: UserDrawer(userName: userName, userEmail: userEmail),
       ),
-      // **Note:** The Drawer widget itself is used here, and the UserDrawer is its child.
-      // The default Drawer animation is usually quick (250ms). If you still find it slow,
-      // the issue might be in how you're using the custom UserDrawer. The code above uses
-      // the default Drawer implementation, which should have a smooth animation.
 
-      // --- Custom AppBar Implementation ---
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(95.0),
         child: Container(
@@ -134,13 +127,8 @@ class _GeneralUserHomePageState extends State<GeneralUserHomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Left Side: FIX - Changed to standard Icons.menu
                 IconButton(
-                  icon: const Icon(
-                    Icons.menu,
-                    size: 30,
-                    color: kPrimaryGreen, // Match color scheme
-                  ),
+                  icon: const Icon(Icons.menu, size: 30, color: kPrimaryGreen),
                   onPressed: () {
                     _scaffoldKey.currentState?.openDrawer();
                   },
@@ -186,12 +174,10 @@ class _GeneralUserHomePageState extends State<GeneralUserHomePage> {
           ),
         ),
       ),
-      // --- End Custom AppBar Implementation ---
 
       // Displays the current page based on _selectedIndex
       body: _pages[_selectedIndex],
 
-      // --- Curved Navigation Bar Implementation ---
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         index: _selectedIndex,
@@ -205,7 +191,6 @@ class _GeneralUserHomePageState extends State<GeneralUserHomePage> {
         onTap: _onItemTapped,
         letIndexChange: (index) => true,
       ),
-      // --- End Curved Navigation Bar Implementation ---
     );
   }
 }

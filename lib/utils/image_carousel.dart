@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
-// --- Global Constants ---
-const Color kPrimaryGreen = Color(0xFF4C7D4D); // Used for loading indicator
+const Color kPrimaryGreen = Color(0xFF4C7D4D);
 
 class ImageCarousel extends StatelessWidget {
-  final List<String> imageUrls; // Renamed for clarity
+  final List<String> imageUrls;
   final double height;
   final bool autoPlay;
 
   const ImageCarousel({
     Key? key,
-    required this.imageUrls, // Now accepts URLs
+    required this.imageUrls,
     this.height = 200.0,
     this.autoPlay = true,
   }) : super(key: key);
@@ -28,7 +27,6 @@ class ImageCarousel extends StatelessWidget {
         autoPlay: autoPlay,
         enlargeCenterPage: true,
         viewportFraction: 0.9,
-        // Optional: Add onPageChanged if you want dots back
       ),
       items: imageUrls.map((url) {
         return Container(
@@ -49,11 +47,8 @@ class ImageCarousel extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // FIX: Use FadeInImage.network to handle URL loading and flickering
                 FadeInImage(
-                  placeholder: const AssetImage(
-                    'assets/placeholder.png',
-                  ), // Replace with your placeholder asset
+                  placeholder: const AssetImage('assets/placeholder.png'),
                   image: NetworkImage(url),
                   fit: BoxFit.cover,
                   imageErrorBuilder: (context, error, stackTrace) => Container(
@@ -77,7 +72,6 @@ class ImageCarousel extends StatelessWidget {
                         ),
                       ),
                 ),
-                // Optional overlay (e.g., label or gradient) - Removed text label for cleanliness
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(

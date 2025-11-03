@@ -4,13 +4,12 @@ import 'package:rootrails/services/auth_service.dart';
 import 'package:rootrails/utils/custom_text_field.dart';
 import 'package:rootrails/pages/general_user/general_user_home_page.dart';
 
-// --- Custom Colors for Theme Consistency ---
-const Color kPrimaryGreen = Color(0xFF4C7D4D); // Dark Green from Start Page
+const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kCardColor = Colors.white;
-const Color kGradientStart = Color(0xFF7CB342); // Light Green for Button
-const Color kGradientEnd = Color(0xFF4CAF50); // Dark Green for Button
+const Color kGradientStart = Color(0xFF7CB342);
+const Color kGradientEnd = Color(0xFF4CAF50);
 
-// --- Custom Clipper for the Rounded Card Shape ---
+//Custom Clipper for the Rounded Card Shape
 class TopRoundedClipper extends CustomClipper<Path> {
   final double radius;
 
@@ -153,16 +152,14 @@ class _GeneralUserRegistrationPageState
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            // --- TOP BACKGROUND CONTAINER (Fills the required height) ---
-            // This container ensures the green color extends far enough to cover the header
+            //TOP BACKGROUND CONTAINER
             Container(
               height: screenHeight * headerHeight,
               width: double.infinity,
-              color:
-                  kPrimaryGreen, // This is technically redundant due to Scaffold BG, but safer for the Stack
+              color: kPrimaryGreen,
             ),
 
-            // --- GREEN HEADER CONTENT (Safe Area for Back Button/Icon) ---
+            //GREEN HEADER CONTENT
             Positioned(
               top: 0,
               left: 0,
@@ -198,9 +195,8 @@ class _GeneralUserRegistrationPageState
               ),
             ),
 
-            // --- MAIN REGISTRATION CARD (White Area) ---
+            // MAIN REGISTRATION CARD
             Container(
-              // Position the white card just below the desired green header start point
               margin: EdgeInsets.only(
                 top: screenHeight * (headerHeight - overlapOffset),
               ),
@@ -208,7 +204,7 @@ class _GeneralUserRegistrationPageState
                 clipper: TopRoundedClipper(30), // Rounded top corners
                 child: Container(
                   color: kCardColor,
-                  // Ensure the card fills the rest of the screen height MINIMALLY
+
                   constraints: BoxConstraints(
                     minHeight:
                         screenHeight * (1.0 - (headerHeight - overlapOffset)),
@@ -222,7 +218,6 @@ class _GeneralUserRegistrationPageState
                       children: <Widget>[
                         const SizedBox(height: 40),
 
-                        // Title: Sign Up
                         Text(
                           'Sign Up',
                           style: Theme.of(context).textTheme.headlineLarge

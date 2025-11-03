@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Enum for theme type
 enum AppTheme { light, dark, animal }
 
 // Theme Data for Light Mode
@@ -10,7 +9,6 @@ final ThemeData lightTheme = ThemeData(
   primarySwatch: Colors.green,
   scaffoldBackgroundColor: const Color(0xFFF5F5F5), // Light grey background
   appBarTheme: const AppBarTheme(
-    // Already correct
     color: Colors.green,
     iconTheme: IconThemeData(color: Colors.white),
     titleTextStyle: TextStyle(
@@ -19,12 +17,10 @@ final ThemeData lightTheme = ThemeData(
       fontWeight: FontWeight.w600,
     ),
   ),
-  // FIXED: Using CardThemeData instead of CardTheme
+
   cardTheme: const CardThemeData(
-    // <-- FIX APPLIED HERE
     color: Colors.white,
     elevation: 4,
-    // FIXED: Removed redundant nested const
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(12),
@@ -57,11 +53,8 @@ final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   primarySwatch: Colors.blueGrey,
   scaffoldBackgroundColor: Colors.grey.shade900,
-  // FIX 3: Added const to AppBarTheme
   appBarTheme: const AppBarTheme(
-    color: Color(
-      0xFF263238,
-    ), // Colors.blueGrey.shade900 is dynamic, replaced with const
+    color: Color(0xFF263238),
     iconTheme: IconThemeData(color: Colors.white),
     titleTextStyle: TextStyle(
       color: Colors.white,
@@ -69,12 +62,9 @@ final ThemeData darkTheme = ThemeData(
       fontWeight: FontWeight.w600,
     ),
   ),
-  // FIXED: Using CardThemeData instead of CardTheme
   cardTheme: const CardThemeData(
-    // <-- FIX APPLIED HERE
-    color: const Color(0xFF424242), // Colors.grey.shade800 const equivalent
+    color: const Color(0xFF424242),
     elevation: 4,
-    // FIXED: Removed redundant nested const
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(12),
@@ -109,14 +99,13 @@ final ThemeData darkTheme = ThemeData(
   ),
 );
 
-// Theme Data for Animal/Custom Mode (e.g., Savannah theme)
+// Theme Data for Animal/Custom Mode
 final ThemeData animalTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.deepOrange,
-  scaffoldBackgroundColor: const Color(0xFFFFF8E1), // Light yellow/sand
-  // FIX 3: Added const to AppBarTheme
+  scaffoldBackgroundColor: const Color(0xFFFFF8E1),
   appBarTheme: const AppBarTheme(
-    color: Color(0xFF5D4037), // Colors.brown.shade700 const equivalent
+    color: Color(0xFF5D4037),
     iconTheme: IconThemeData(color: Colors.white),
     titleTextStyle: TextStyle(
       color: Colors.white,
@@ -124,12 +113,9 @@ final ThemeData animalTheme = ThemeData(
       fontWeight: FontWeight.bold,
     ),
   ),
-  // FIXED: Using CardThemeData instead of CardTheme
   cardTheme: const CardThemeData(
-    // <-- FIX APPLIED HERE
-    color: const Color(0xFFFFFDE7), // Very light yellow
+    color: const Color(0xFFFFFDE7),
     elevation: 6,
-    // FIXED: Removed redundant nested const
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(16),

@@ -60,7 +60,7 @@ class Business {
     );
   }
 
-  // 👇 ADDING THE copyWith METHOD TO FIX THE COMPILATION ERROR
+  //Added THE copyWith METHOD TO FIX THE COMPILATION ERROR
   Business copyWith({
     String? uid,
     String? email,
@@ -88,7 +88,7 @@ class Business {
       safariDurationHours: safariDurationHours ?? this.safariDurationHours,
       locationInfo: locationInfo ?? this.locationInfo,
       role: role ?? this.role,
-      isOpen: isOpen ?? this.isOpen, // This is the field primarily updated
+      isOpen: isOpen ?? this.isOpen,
       parkId: parkId ?? this.parkId,
       businessType: businessType ?? this.businessType,
       rating: rating ?? this.rating,

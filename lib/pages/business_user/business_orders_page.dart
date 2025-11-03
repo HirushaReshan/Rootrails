@@ -41,12 +41,11 @@ class BusinessOrdersPage extends StatelessWidget {
 
   Widget _buildOrderList(
     String driverId,
-    List<String> statuses, // <-- Changed to accept a list
+    List<String> statuses,
   ) {
     final bool isHistory = statuses.length > 1;
 
     return StreamBuilder<List<Booking>>(
-      // FIX: Call the new function that filters in Firestore
       stream: BookingService().getDriverOrdersByStatus(driverId, statuses),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart'; // Import CurvedNavigationBar
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:rootrails/models/business.dart';
 import 'package:rootrails/widgets/business_drawer.dart';
 import 'dart:async';
 
-// Import all pages used in the bottom navigation
 import 'package:rootrails/pages/business_user/business_orders_page.dart';
 import 'package:rootrails/pages/business_user/business_profile_page.dart';
 import 'package:rootrails/pages/common/navigation_page.dart';
 
-// Define the custom colors used for consistency
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
 const Color kOrangeAccent = Color(0xFFFFA500);
 
-// GlobalKey for Scaffold for drawer access
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-// GlobalKey for CurvedNavigationBar
 final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
 class BusinessUserHomePage extends StatefulWidget {
@@ -35,12 +31,12 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
 
   // Pages are defined here
   final List<Widget> _pages = [
-    const BusinessOrdersPage(), // Index 0: Orders/Dashboard
-    const NavigationPage(), // Index 1: Navigation (Map)
-    const BusinessProfilePage(), // Index 2: Profile/Settings
+    const BusinessOrdersPage(), // Index 0
+    const NavigationPage(), // Index 1
+    const BusinessProfilePage(), // Index 2
   ];
 
-  // Define the list of icons for the CurvedNavigationBar (3 items for business user)
+  // Define the list of icons for the CurvedNavigationBar
   final List<Widget> _icons = const [
     Icon(Icons.dashboard, size: 30, color: Colors.white), // Orders/Dashboard
     Icon(Icons.map, size: 30, color: Colors.white), // Route
@@ -146,7 +142,6 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
         child: BusinessDrawer(businessName: businessName, userEmail: userEmail),
       ),
 
-      // --- Custom AppBar Implementation (Latest Design) ---
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(95.0),
         child: Container(
@@ -171,7 +166,7 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // 1. Left Side: Custom Menu/Drawer Icon
+                //Drawer Icon
                 IconButton(
                   icon: const Icon(Icons.menu, size: 30, color: kPrimaryGreen),
                   onPressed: () {
@@ -181,7 +176,7 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
                   constraints: const BoxConstraints(),
                 ),
 
-                // 2. Center: Branded RooTrails Title
+                //RooTrails Title
                 Row(
                   children: const [
                     Text(
@@ -203,7 +198,7 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
                   ],
                 ),
 
-                // 3. Right Side: Status Toggle (Integrated from original AppBar actions)
+                //Status Toggle
                 Row(
                   children: [
                     Text(
@@ -211,7 +206,7 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
                       style: TextStyle(
                         color: isOpen
                             ? kPrimaryGreen
-                            : Colors.red, // Use primary green for ON status
+                            : Colors.red, //ON status
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -231,25 +226,23 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
         ),
       ),
 
-      // --- End Custom AppBar Implementation ---
       body: _pages[_selectedIndex],
 
-      // --- Curved Navigation Bar Implementation (Latest Design) ---
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         index: _selectedIndex,
         height: 60.0,
         items: _icons,
-        color: kPrimaryGreen, // Color of the navigation bar background
+        color: kPrimaryGreen,
         buttonBackgroundColor:
-            kPrimaryGreen, // Color of the central item button
-        backgroundColor: Colors.transparent, // Background color behind the bar
+            kPrimaryGreen, 
+        backgroundColor: Colors.transparent,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 300),
         onTap: _onItemTapped,
         letIndexChange: (index) => true,
       ),
-      // --- End Curved Navigation Bar Implementation ---
+      
     );
   }
 }

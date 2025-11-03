@@ -68,7 +68,7 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
         id: '',
         userId: user.uid,
         driverId: widget.driver.uid,
-        parkId: widget.driver.parkId, // <-- Includes parkId
+        parkId: widget.driver.parkId,
         driverName: widget.driver.businessName,
         parkName: widget.parkName,
         bookingDate: widget.bookingDate,
@@ -132,7 +132,6 @@ class _DummyPaymentPageState extends State<DummyPaymentPage> {
             _buildSummaryRow('Driver:', widget.driver.businessName),
             _buildSummaryRow(
               'Date:',
-              // 🔥 FIX: Corrected typo 'widget_bookingDate'
               '${widget.bookingDate.month}/${widget.bookingDate.day}/${widget.bookingDate.year}',
             ),
             _buildSummaryRow('Time:', widget.bookingTime),

@@ -51,7 +51,6 @@ class ParkDetailPage extends StatelessWidget {
 
   Widget _buildDriverList(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      // FIX: Queries the 'drivers' collection
       stream: FirebaseFirestore.instance
           .collection('drivers')
           .where('park_id', isEqualTo: park.id) // Filter by park
@@ -143,7 +142,7 @@ class DriverCard extends StatelessWidget {
         ),
         isThreeLine: true,
         onTap: () {
-          // Navigates to your existing driver_detail_page.dart
+          // Navigates to existing driver_detail_page.dart
           Navigator.push(
             context,
             MaterialPageRoute(

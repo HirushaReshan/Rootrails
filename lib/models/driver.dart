@@ -10,7 +10,7 @@ class Driver {
   final double safariDurationHours;
   final bool isOpenNow;
   final String locationInfo;
-  final String businessDescription; // Added for detail page
+  final String businessDescription;
 
   Driver({
     required this.uid,

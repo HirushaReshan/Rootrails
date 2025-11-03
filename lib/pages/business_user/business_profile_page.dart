@@ -57,9 +57,9 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
   Future<void> _fetchBusinessProfile() async {
     if (firebaseUser == null) return;
 
-    // Fetch from the 'drivers' collection
+    //Get from 'drivers' collection
     final doc = await FirebaseFirestore.instance
-        .collection('drivers') // <-- FIX: Reads from 'drivers'
+        .collection('drivers') 
         .doc(firebaseUser!.uid)
         .get();
     if (doc.exists) {
@@ -99,7 +99,7 @@ class _BusinessProfilePageState extends State<BusinessProfilePage> {
 
     try {
       await FirebaseFirestore.instance
-          .collection('drivers') // <-- FIX: Writes to 'drivers'
+          .collection('drivers')
           .doc(firebaseUser!.uid)
           .update({
             'business_name': _nameController.text.trim(),

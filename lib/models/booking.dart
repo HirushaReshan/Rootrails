@@ -4,21 +4,22 @@ class Booking {
   final String id;
   final String userId;
   final String driverId;
-  final String parkId; // <-- ADDED
+  final String parkId;
   final String driverName;
   final String parkName;
   final DateTime bookingDate;
   final String bookingTime;
   final double totalAmount;
   final String notes;
-  final String status; // 'pending', 'confirmed', 'canceled', 'completed'
+  final String
+  status; // 'pending', 'confirmed', 'canceled', 'completed' will get here
   final String userFullName; // For driver to see
 
   Booking({
     required this.id,
     required this.userId,
     required this.driverId,
-    required this.parkId, // <-- ADDED
+    required this.parkId,
     required this.driverName,
     required this.parkName,
     required this.bookingDate,
@@ -37,7 +38,7 @@ class Booking {
       id: doc.id,
       userId: data['user_id'] ?? '',
       driverId: data['driver_id'] ?? '',
-      parkId: data['park_id'] ?? '', // <-- ADDED
+      parkId: data['park_id'] ?? '',
       driverName: data['driver_name'] ?? 'N/A',
       parkName: data['park_name'] ?? 'N/A',
       bookingDate: (data['booking_date'] as Timestamp).toDate(),
@@ -53,7 +54,7 @@ class Booking {
     return {
       'user_id': userId,
       'driver_id': driverId,
-      'park_id': parkId, // <-- ADDED
+      'park_id': parkId,
       'driver_name': driverName,
       'park_name': parkName,
       'booking_date': Timestamp.fromDate(bookingDate),
