@@ -54,7 +54,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "lib/assets/rootrails_logo.png"
+  image_path: "lib/images/RooTrails_Logo.png"
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
