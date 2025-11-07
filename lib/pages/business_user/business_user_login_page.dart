@@ -120,6 +120,26 @@ class _BusinessUserLoginPageState extends State<BusinessUserLoginPage> {
               child: SafeArea(
                 child: Column(
                   children: [
+                    // **START: Back Button Added**
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: kCardColor, // White color for visibility
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            // Go back to the previous screen (RoleSelectionPage)
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+
+                    // **END: Back Button Added**
                     const SizedBox(height: 20),
                     // Icon placeholder
                     const Icon(

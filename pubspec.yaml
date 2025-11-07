@@ -45,6 +45,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.3
   curved_navigation_bar: ^1.0.6
+  google_maps_flutter: ^2.14.0
+  geolocator: ^14.0.2
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  google_fonts: ^6.3.2
 
 
 dev_dependencies:
@@ -54,7 +59,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "lib/assets/rootrails_logo.png"
+  image_path: "lib/images/RooTrails_Logo.png"
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -79,8 +84,10 @@ flutter:
   assets:
     - lib/images/google.png
     - lib/images/
-    - lib/images/1.jpg
-    - lib/images/leopard.png
+    - lib/images/Leopard_start.png
+    - lib/images/animals/
+    - lib/images/animals.png
+    - lib/images/forest_bg.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -8,6 +8,9 @@ class CustomFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
 
+  // FIX: Add maxLines parameter
+  final int? maxLines;
+
   const CustomFormField({
     super.key,
     required this.controller,
@@ -16,6 +19,8 @@ class CustomFormField extends StatelessWidget {
     this.obscureText = false,
     this.validator,
     this.keyboardType = TextInputType.text,
+    // FIX: Initialize maxLines in the constructor
+    this.maxLines = 1, // Default to 1 line for standard fields
   });
 
   @override
@@ -27,6 +32,10 @@ class CustomFormField extends StatelessWidget {
         obscureText: obscureText,
         validator: validator,
         keyboardType: keyboardType,
+
+        // FIX: Pass maxLines to the TextFormField
+        maxLines: maxLines,
+
         style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         decoration: InputDecoration(
           labelText: labelText,

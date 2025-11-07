@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart'; // Import CurvedNavigationBar
 import 'package:rootrails/models/business.dart';
+import 'package:rootrails/pages/general_user/map_page.dart';
 import 'package:rootrails/widgets/business_drawer.dart';
 import 'dart:async';
 
@@ -36,7 +37,7 @@ class _BusinessUserHomePageState extends State<BusinessUserHomePage> {
   // Pages are defined here
   final List<Widget> _pages = [
     const BusinessOrdersPage(), // Index 0: Orders/Dashboard
-    const NavigationPage(), // Index 1: Navigation (Map)
+    const MapPage(), // Index 1: Navigation (Map)
     const BusinessProfilePage(), // Index 2: Profile/Settings
   ];
 

@@ -1,47 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rootrails/pages/common/role_selection_page.dart';
 
-// --- Global Constants (Moved to top-level for better access) ---
-// Define custom colors for easy changes later
 const Color kPrimaryGreen = Color(0xFF4C7D4D);
-const Color kSecondaryGreen = Color(0xFF7A9E7A);
-const Color kTextColor = Colors.white;
-
-// Define custom asset paths
-const String kLeopardImagePath = 'assets/leopard.png';
-const IconData kNavigationIcon = Icons.directions_car_filled;
-
-// ====================================================================
-// --- CORRECTED: CustomPainter Class (Must be Top-Level) ---
-// ====================================================================
-class CurvedBackgroundPainter extends CustomPainter {
-  final Color color;
-
-  // Constructor now correctly defines the 'color' field
-  CurvedBackgroundPainter(this.color);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Create a path that covers the desired area with a curved top-left corner
-    final path = Path()
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..arcToPoint(
-        const Offset(0, 100), // Starting point of the arc (top-left corner)
-        radius: const Radius.circular(50), // Radius of the curve
-        clockwise: false,
-      )
-      ..close();
-
-    final paint = Paint()..color = color;
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-// ====================================================================
+const String kLeopardImagePath = 'lib/images/Leopard_start.png';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -53,28 +14,21 @@ class StartPage extends StatefulWidget {
 class _StartPageState extends State<StartPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _opacityAnimation;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 2),
       vsync: this,
+      duration: const Duration(seconds: 2),
     );
-
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
-      ),
-    );
-
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
-          CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn),
-        );
+    _fadeAnim = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -87,124 +41,167 @@ class _StartPageState extends State<StartPage>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final greenWidth = screenWidth * 0.6;
 
     return Scaffold(
-      backgroundColor: kPrimaryGreen,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // --- Background Leopard Image ---
+          // --- 3. Paw Prints Background (subtle texture) ---
           Positioned(
-            right: -100,
-            bottom: 0,
+            left: screenWidth * 0.2,
+            top: 100,
             child: Opacity(
-              opacity: 0.8,
-              child: Image.asset(
-                kLeopardImagePath,
-                height: screenHeight * 0.9,
-                fit: BoxFit.cover,
-                alignment: Alignment.centerRight,
+              opacity: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    '🐾',
+                    style: TextStyle(fontSize: 36, color: Colors.amber),
+                  ),
+                  SizedBox(height: 50),
+                  Text('🐾', style: TextStyle(fontSize: 40)),
+                  SizedBox(height: 50),
+                  Text('🐾 🐾 🐾 🐾', style: TextStyle(fontSize: 40)),
+                ],
               ),
             ),
           ),
 
-          // --- Curved Container Shape (Green Overlay) ---
-          Positioned.fill(
-            child: CustomPaint(
-              // Now it correctly calls the top-level class
-              painter: CurvedBackgroundPainter(
-                kSecondaryGreen.withOpacity(0.9),
-              ),
+          //whitebox top big
+          Positioned(
+            top: 0,
+            left: 0,
+            width: screenWidth,
+            height: screenHeight,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(),
+              child: Container(color: Colors.white),
             ),
           ),
 
-          // --- Foreground UI Elements (Text and Button) ---
-          SlideTransition(
-            position: _slideAnimation,
-            child: FadeTransition(
-              opacity: _opacityAnimation,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 80.0,
-                  left: 20.0,
-                  right: 20.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 'Welcome to' text
-                    const Text(
+          //green top
+          Positioned(
+            top: 50,
+            left: 50,
+            width: screenWidth,
+            height: screenHeight * 0.7,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(40),
+                bottomLeft: Radius.circular(40),
+              ),
+              child: Container(color: kPrimaryGreen),
+            ),
+          ),
+
+          //green bottom
+          Positioned(
+            bottom: 0,
+            left: 120,
+            width: screenWidth,
+            height: screenHeight * 0.2,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(50),
+              ),
+              child: Container(color: kPrimaryGreen),
+            ),
+          ),
+
+          // --- 2. Leopard Image on the right ---
+          Positioned(
+            right: 0,
+            bottom: 0,
+            width: screenWidth, // full width
+            height: screenHeight * 0.7, // 60% of screen height
+            child: Image.asset(
+              kLeopardImagePath,
+              fit: BoxFit.contain, // makes sure it’s not cut off
+              alignment: Alignment.bottomRight, // keep it aligned bottom-right
+            ),
+          ),
+
+          // --- 4. Foreground Text and Button ---
+          FadeTransition(
+            opacity: _fadeAnim,
+            child: SlideTransition(
+              position: _slideAnim,
+              child: Stack(
+                children: [
+                  // “Welcome to”
+                  Positioned(
+                    top: 100, // adjust freely
+                    left: 150,
+                    child: const Text(
                       'Welcome\nto',
                       style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w300,
-                        color: kTextColor,
+                        color: Colors.white,
+                        fontSize: 50,
+                        fontWeight: FontWeight.w400,
                         height: 1.0,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                  ),
 
-                    // 'ROO TRAILS' vertical text
-                    Row(
-                      children: [
-                        RotatedBox(
-                          quarterTurns: -1,
-                          child: Text(
-                            'ROO TRAILS',
-                            style: TextStyle(
-                              fontSize: 55,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 8,
-                              color: kTextColor.withOpacity(0.8),
-                              shadows: const [
-                                Shadow(blurRadius: 10.0, color: Colors.black38),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const Spacer(), // Pushes the button to the bottom
-                    // 'Get Started' Button
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 50.0),
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const RoleSelectionPage(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(kNavigationIcon, size: 24),
-                          label: const Text(
-                            'Get Started',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: kSecondaryGreen,
-                            backgroundColor: kTextColor,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 30,
-                              vertical: 15,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 10,
-                          ),
+                  // Vertical “ROO TRAILS”
+                  Positioned(
+                    top: 250,
+                    left: 80,
+                    child: RotatedBox(
+                      quarterTurns: -1,
+                      child: Text(
+                        'ROO TRAILS',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.95),
+                          fontSize: 46,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 10,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  // “Get Started” Button
+                  Positioned(
+                    bottom: 183,
+                    left: 40,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RoleSelectionPage(),
+                          ),
+                        );
+                      },
+                      label: const Text(
+                        'Get Started',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      icon: const Icon(Icons.directions_bus_filled, size: 22),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color.fromARGB(255, 1, 153, 9),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 50,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

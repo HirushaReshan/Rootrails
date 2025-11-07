@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:rootrails/models/general_user.dart';
+import 'package:rootrails/pages/general_user/map_page.dart';
 import 'package:rootrails/widgets/user_drawer.dart';
 
 // Import all pages used in the bottom navigation
 import 'package:rootrails/pages/general_user/park_list_page.dart';
 import 'package:rootrails/pages/general_user/my_list_page.dart';
-import 'package:rootrails/pages/common/navigation_page.dart';
 import 'package:rootrails/pages/general_user/general_user_profile_page.dart';
 
 // Define the custom colors used for consistency
@@ -37,7 +37,7 @@ class _GeneralUserHomePageState extends State<GeneralUserHomePage> {
   final List<Widget> _pages = [
     const ParkListPage(),
     const MyListPage(),
-    const NavigationPage(),
+    const MapPage(),
     const GeneralUserProfilePage(),
   ];
 

@@ -5,11 +5,8 @@ import 'package:rootrails/theme/app_themes.dart';
 import 'package:rootrails/pages/common/role_selection_page.dart';
 import 'package:rootrails/pages/common/settings_page.dart';
 import 'package:rootrails/pages/common/contact_us_page.dart';
-import 'package:rootrails/pages/business_user/business_orders_page.dart';
 
-// Define the core colors from your designs
-const Color kPrimaryGreen = Color(0xFF4C7D4D);
-const Color kLightGreenBackground = Color(0xFFE6F4E6);
+// Note: Removed kPrimaryGreen and kLightGreenBackground as they are now dynamic
 
 class BusinessDrawer extends StatelessWidget {
   final String businessName;
@@ -28,11 +25,19 @@ class BusinessDrawer extends StatelessWidget {
     String title,
     VoidCallback onTap,
   ) {
+    // Use theme colors for the icon and text
+    final theme = Theme.of(context);
     return ListTile(
-      leading: Icon(icon, color: kPrimaryGreen),
+      leading: Icon(
+        icon,
+        color: theme.colorScheme.primary,
+      ), // Dynamic Icon Color
       title: Text(
         title,
-        style: const TextStyle(fontSize: 16, color: Colors.black87),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontSize: 16,
+          color: theme.colorScheme.onSurface, // Dynamic Text Color
+        ),
       ),
       onTap: onTap,
     );
@@ -40,10 +45,18 @@ class BusinessDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final themeService = Provider.of<ThemeService>(context);
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Menu items based on your original functional code:
+    // Determine colors based on the current theme
+    final primaryColor = theme.colorScheme.primary;
+    final onSurfaceColor = theme.colorScheme.onSurface;
+    final drawerBackgroundColor = theme.scaffoldBackgroundColor;
+
+    // Fallback for the custom bottom section background (using a lighter primary variant)
+    final bottomBarColor = primaryColor.withOpacity(0.1);
+
     final List<Map<String, dynamic>> menuItems = [
       {
         'icon': Icons.contact_support,
@@ -58,7 +71,7 @@ class BusinessDrawer extends StatelessWidget {
     ];
 
     return Drawer(
-      backgroundColor: Colors.white,
+      backgroundColor: drawerBackgroundColor, // Dynamic Drawer Background
       width: MediaQuery.of(context).size.width * 0.75, // Adjust drawer width
       child: Column(
         children: [
@@ -73,17 +86,17 @@ class BusinessDrawer extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.close, size: 30),
-                  color: Colors.black,
+                  color: onSurfaceColor, // Dynamic Close Icon Color
                   onPressed: () => Navigator.pop(context),
                 ),
                 const Spacer(),
                 // Placeholder for the Notification Bell
-                const Padding(
-                  padding: EdgeInsets.only(right: 15.0),
+                Padding(
+                  padding: const EdgeInsets.only(right: 15.0),
                   child: Icon(
                     Icons.notifications_none,
                     size: 28,
-                    color: kPrimaryGreen,
+                    color: primaryColor, // Dynamic Notification Icon Color
                   ),
                 ),
               ],
@@ -91,30 +104,35 @@ class BusinessDrawer extends StatelessWidget {
           ),
 
           // Branded App Title (RooTrails logo spot)
-          const Padding(
-            padding: EdgeInsets.only(left: 20.0, bottom: 5.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0, bottom: 5.0),
             child: Row(
               children: [
                 Text(
                   'RooTrails',
-                  style: TextStyle(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: kPrimaryGreen,
+                    color: primaryColor, // Dynamic App Title Color
                   ),
                 ),
               ],
             ),
           ),
 
-          const Divider(height: 1, thickness: 0.5, indent: 20, endIndent: 20),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            indent: 20,
+            endIndent: 20,
+            color: onSurfaceColor.withOpacity(0.2), // Dynamic Divider Color
+          ),
 
           // 2. MIDDLE SECTION (Scrollable Menu Items and Theme Switch)
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // Business Profile Info (Replacing UserAccountsDrawerHeader area)
+                // Business Profile Info
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -124,12 +142,15 @@ class BusinessDrawer extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: kPrimaryGreen,
-                        child: const Icon(
+                        backgroundColor:
+                            primaryColor, // Dynamic Avatar Background
+                        child: Icon(
                           Icons.directions_bus,
                           size: 30,
-                          color: Colors.white,
-                        ), // Using business icon
+                          color: theme
+                              .colorScheme
+                              .onPrimary, // Icon color in Avatar
+                        ),
                       ),
                       const SizedBox(width: 15),
                       Column(
@@ -137,14 +158,18 @@ class BusinessDrawer extends StatelessWidget {
                         children: [
                           Text(
                             businessName,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                            style: theme.textTheme.titleLarge?.copyWith(
                               fontSize: 18,
+                              color: onSurfaceColor, // Dynamic Name Color
                             ),
                           ),
                           Text(
                             userEmail,
-                            style: TextStyle(color: Colors.grey.shade600),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: onSurfaceColor.withOpacity(
+                                0.6,
+                              ), // Dynamic Email Color
+                            ),
                           ),
                         ],
                       ),
@@ -170,14 +195,17 @@ class BusinessDrawer extends StatelessWidget {
                   );
                 }).toList(),
 
-                const Divider(
+                Divider(
                   height: 30,
                   thickness: 0.5,
                   indent: 20,
                   endIndent: 20,
+                  color: onSurfaceColor.withOpacity(
+                    0.2,
+                  ), // Dynamic Divider Color
                 ),
 
-                // Theme Switcher Logic (Retained Dark Mode only)
+                // Theme Switcher Logic (Including Animal Theme for consistency)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
@@ -185,25 +213,58 @@ class BusinessDrawer extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
+                      // Dark Mode Switch
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.brightness_6, color: Colors.grey),
+                          Icon(
+                            Icons.brightness_6,
+                            color: onSurfaceColor.withOpacity(0.6),
+                          ), // Dynamic Icon Color
                           const SizedBox(width: 10),
-                          const Expanded(
+                          Expanded(
                             child: Text(
                               'Dark Mode',
-                              style: TextStyle(fontSize: 16),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 16,
+                              ), // Dynamic Text Color
                             ),
                           ),
                           Switch(
                             value: themeService.currentTheme == AppTheme.dark,
                             onChanged: (value) => themeService.toggleTheme(),
-                            activeColor: kPrimaryGreen,
+                            activeColor:
+                                primaryColor, // Dynamic Switch Active Color
                           ),
                         ],
                       ),
-                      // Removed Animal Theme as it wasn't explicitly present in your original code
+                      // Animal Theme Switch (Added for theme consistency across roles)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Icon(
+                            Icons.pets,
+                            color: onSurfaceColor.withOpacity(0.6),
+                          ), // Dynamic Icon Color
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Animal Theme',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 16,
+                              ), // Dynamic Text Color
+                            ),
+                          ),
+                          Switch(
+                            value: themeService.currentTheme == AppTheme.animal,
+                            onChanged: (value) => themeService.switchTheme(
+                              value ? AppTheme.animal : AppTheme.light,
+                            ),
+                            activeColor:
+                                primaryColor, // Dynamic Switch Active Color
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -211,22 +272,28 @@ class BusinessDrawer extends StatelessWidget {
             ),
           ),
 
-          // 3. BOTTOM SECTION (Logout and Green Background)
+          // 3. BOTTOM SECTION (Logout and Custom Background)
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               height: screenHeight * 0.20,
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              decoration: const BoxDecoration(color: kLightGreenBackground),
+              decoration: BoxDecoration(
+                color: bottomBarColor,
+              ), // Dynamic Bottom Bar Background
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Placeholder for the tree image/motif
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 10.0),
-                    child: Icon(Icons.nature, size: 40, color: Colors.green),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10.0),
+                    child: Icon(
+                      Icons.nature,
+                      size: 40,
+                      color: primaryColor,
+                    ), // Dynamic Icon Color
                   ),
 
                   // Logout Button
@@ -242,19 +309,23 @@ class BusinessDrawer extends StatelessWidget {
                         );
                       }
                     },
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Logout',
-                          style: TextStyle(
+                          style: theme.textTheme.bodyLarge?.copyWith(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: onSurfaceColor, // Dynamic Text Color
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Icon(Icons.logout, color: Colors.black87, size: 24),
+                        const SizedBox(width: 10),
+                        Icon(
+                          Icons.logout,
+                          color: onSurfaceColor,
+                          size: 24,
+                        ), // Dynamic Icon Color
                       ],
                     ),
                   ),

@@ -1,198 +1,268 @@
 import 'package:flutter/material.dart';
-import 'package:rootrails/pages/general_user/general_user_login_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:rootrails/pages/business_user/business_user_login_page.dart';
+import 'package:rootrails/pages/general_user/general_user_login_page.dart';
 
-// Define a consistent color scheme, like the green used previously
-const Color kPrimaryGreen = Color(0xFF4C7D4D);
-const Color kAccentColor = Color(0xFF8BC34A); // A lighter green for accents
+// Colors
+const Color kPrimaryGreen = Color(0xFF5BA84B);
+const Color kDarkGreen = Color(0xFF1F4A27);
+const String kForestBackground = 'lib/images/forest_bg.png';
+const String kAnimalsSilhouette = 'lib/images/animals.png';
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // 1. Remove AppBar and use a flexible body for the header style
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            // --- Branded Header Section (Mimicking a login banner) ---
-            _buildBrandedHeader(context),
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
-            // --- Role Selection Content ---
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 30.0,
-                vertical: 40.0,
+    // 🟢 Control forest image upward stretch here (0.0 to 0.3 is good)
+
+    return Scaffold(
+      body: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          // 🌿 Background gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [kPrimaryGreen, kDarkGreen],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+
+          // 🌳 Forest image background (stretchable upward)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              kForestBackground,
+              fit: BoxFit.cover,
+              height: screenHeight * 0.7,
+            ),
+          ),
+
+          // 🐾 Animals silhouette overlay
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              kAnimalsSilhouette,
+              fit: BoxFit.fitWidth,
+              height: screenHeight * 0.3,
+            ),
+          ),
+
+          // 🟩 Gradient curved top section
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ClipPath(
+              clipper: TopCurvedClipper(),
+              child: Container(
+                height: screenHeight * 0.7,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 82, 139, 75),
+                      Color.fromARGB(255, 25, 53, 21),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // 🌟 Foreground content
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 20.0,
+                left: 30,
+                right: 30
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 30,),
+                  // 🦁 Title
                   Text(
-                    'Choose Your Role',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                    "Explore the Wild with",
+                    style: GoogleFonts.poppins(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
+
                   Text(
-                    'Are you looking for a safari, or offering a service?',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.grey.shade600,
+                    "RooTrails",
+                    style: GoogleFonts.poppins(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFFFAB12F),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 12),
 
-                  // General User Button (Customer)
-                  _buildRoleButton(
-                    context,
-                    icon: Icons.map_outlined,
-                    title: 'Book a Safari (Customer)',
-                    subtitle: 'Find drivers and reserve your spot.',
-                    color: kPrimaryGreen,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const GeneralUserLoginPage(),
-                        ),
-                      );
-                    },
+                  Text(
+                    "Choose how you want to begin your adventure",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
                   ),
-                  const SizedBox(height: 20),
 
-                  // Business User Button (Driver)
-                  _buildRoleButton(
-                    context,
-                    icon: Icons.directions_bus_outlined,
-                    title: 'Offer Safari Service (Driver)',
-                    subtitle: 'Manage your listings and orders.',
-                    color: kAccentColor,
-                    onTap: () {
-                      Navigator.push(
+                  const SizedBox(height: 60),
+
+                  // 🟫 Two selection cards
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildRoleCard(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const BusinessUserLoginPage(),
-                        ),
-                      );
-                    },
+                        title: "Book a Safari",
+                        description: "Embark on thrilling wildlife tours",
+                        highlight: "Plan your journey now",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const GeneralUserLoginPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildRoleCard(
+                        context,
+                        title: "Provide a Service",
+                        description: "Partner with RooTrails and offer rides",
+                        highlight: "Join our Business",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const BusinessUserLoginPage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  // Helper Widget for the styled header section
-  Widget _buildBrandedHeader(BuildContext context) {
-    // We use a safe area to ensure the content starts below the notch/status bar
-    return SafeArea(
+  // 🧭 Card builder
+  Widget _buildRoleCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required String highlight,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
-        height: 200, // Fixed height for the header banner
-        width: double.infinity,
+        width: 150,
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: kPrimaryGreen, // Branded background color
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(50), // Rounded bottom corner style
-            bottomRight: Radius.circular(50),
-          ),
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.8), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 8,
+              offset: const Offset(2, 6),
             ),
           ],
         ),
-        child: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.terrain, // Use a relevant icon or your app logo here
-                size: 60,
+        child: Column(
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
-              SizedBox(height: 8),
-              Text(
-                'ROOT RAILS', // Your app name/brand name
-                style: TextStyle(
+            ),
+            const SizedBox(height: 10),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              highlight,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: const Color(0xFFFAB12F),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 91, 219, 80),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: Text(
+                "Continue",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
                   color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+}
+
+// cureved
+class TopCurvedClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    path.lineTo(0, size.height * 0.85);
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height,
+      size.width,
+      size.height * 0.85,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
   }
 
-  // Helper Widget for the styled buttons
-  Widget _buildRoleButton(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    required Color color, // Added color for differentiation
-  }) {
-    return Card(
-      elevation: 8, // Higher elevation for a floating, form-like effect
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            // Optional: Light background color to highlight the card
-            color: color.withOpacity(0.05),
-          ),
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 40,
-                color: color, // Use the passed color
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: color),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

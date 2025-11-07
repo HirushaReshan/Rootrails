@@ -120,7 +120,29 @@ class _GeneralUserLoginPageState extends State<GeneralUserLoginPage> {
               child: SafeArea(
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+                    // **START: Back Button Added**
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: kCardColor, // White color for visibility
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            // Go back to the previous screen (RoleSelectionPage)
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                    // **END: Back Button Added**
+
+                    // Added small vertical space after the back button if needed, but the padding might be enough
+                    // const SizedBox(height: 10), // Optional extra spacing
+
                     // Icon placeholder
                     const Icon(
                       Icons.person,
