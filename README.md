@@ -150,7 +150,9 @@ If you want to contribute or build the app locally, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/HirushaReshan/Rootrails.git](https://github.com/HirushaReshan/Rootrails.git)
+    git clone https://github.com/HirushaReshan/Rootrails.git
+    ```
+    ```bash
     cd roootrails
     ```
 2.  **Install dependencies:**
@@ -161,4 +163,4 @@ If you want to contribute or build the app locally, follow these steps:
     ```bash
     flutter run
     ```
-    *(Note: You will need to set up your own Firebase configuration files*
+    *(Note: You will need to set up your own Firebase configuration files(ex: firebase_options.dart)*
