@@ -50,16 +50,28 @@ dependencies:
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   google_fonts: ^6.3.2
+  flutter_launcher_icons: ^0.14.4
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-flutter_icons:
-  android: true
-  ios: true
+flutter_launcher_icons:
+  # The path to your icon file
   image_path: "lib/images/RooTrails_Logo.png"
+  # Set to true to generate icons for Android
+  android: true
+  # Set to true to generate icons for iOS
+  ios: true
+  # Optional: Use this to ensure the existing adaptive icon assets are overwritten
+  remove_alpha_channel: false 
+  # Optional: If you want a specific name for the Android adaptive icon foreground
+  # If you use this, the 'image_path' will be used as the foreground.
+  # If you want a background color/image for the Android adaptive icon:
+  # android: "launcher_icon"
+  # adaptive_icon_background: "#ffffff" # A hex code color
+  # adaptive_icon_foreground: "assets/app_icon_foreground.png" # A separate image
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
