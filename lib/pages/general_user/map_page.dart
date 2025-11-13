@@ -41,6 +41,8 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     _loadParks();
+    // 💡 FIX 1: Start fetching location immediately when the page loads
+    _getCurrentLocation();
   }
 
   void _loadParks() async {
@@ -91,13 +93,24 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      // locationService returns a LatLng type (likely gmaps.LatLng or similar)
+      // locationService returns a gmaps.LatLng? type (now returns null on failure)
       final location = await _locationService.getCurrentLocation();
 
       if (location != null) {
-        // Convert the location service's LatLng (whatever its internal type) to latlong2.LatLng
+        // Convert the location service's gmaps.LatLng to latlong2.LatLng
         setState(() {
           _currentLocation = LatLng(location.latitude, location.longitude);
+        });
+      } else {
+        // If location is null (due to permission or service error), inform the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location unavailable. Check permissions and GPS.'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+        setState(() {
+          _currentLocation = null; // Ensure the state reflects no location
         });
       }
     } catch (e) {
@@ -116,6 +129,11 @@ class _MapPageState extends State<MapPage> {
 
     // Restart sighting listener for the new park
     _listenToActiveSightings();
+
+    // 💡 FIX 2: Ensure location is being fetched/retried when switching parks
+    if (_currentLocation == null) {
+      _getCurrentLocation();
+    }
   }
 
   void _showReportSightingModal() {
@@ -136,8 +154,7 @@ class _MapPageState extends State<MapPage> {
       return;
     }
 
-    // CRITICAL FIX: Convert latlong2.LatLng state back to gmaps.LatLng
-    // This satisfies the SightingService's type requirement (Error 2 fixed).
+    // CRITICAL: Convert latlong2.LatLng state back to gmaps.LatLng for SightingService
     final gmaps.LatLng locationToReport = gmaps.LatLng(
       _currentLocation!.latitude,
       _currentLocation!.longitude,
@@ -177,7 +194,6 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  // This method is now USED by passing it as a callback to OsmMapViewer.
   void _showSightingDetails(AnimalSightingModel sighting) {
     showModalBottomSheet(
       context: context,
