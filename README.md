@@ -130,7 +130,7 @@ RooTrails enhances your safari experience with smart technology and transparency
 
 ### Android
 
-1.  Download the latest **`roootrails_app_v1.0.0.apk`** from the [Releases page](https://github.com/HirushaReshan/Rootrails/releases).
+1.  Download the latest **`RooTrails_v1.0.0.apk`** from the [Releases page](https://github.com/HirushaReshan/Rootrails/releases).
 2.  Install the APK directly on your Android device (you may need to allow installations from unknown sources).
 
 >### iOS
